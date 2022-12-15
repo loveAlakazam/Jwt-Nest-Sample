@@ -19,8 +19,8 @@ jobs:
     # 액션 실행내용
     steps:
       - name: Get Current Date
-        id: current-time
-        run: echo "::set-output name=date::$(date +KST%Y%m%d-T%H%M%S.%3N)"
+        run: echo "date=$(date +KST%Y%m%d-T%H%M%S.%3N)"
+
         env:
           TZ: Asia/Seoul
 
