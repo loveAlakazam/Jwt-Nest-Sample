@@ -2,7 +2,7 @@ name: Deploy Development
 on:
   pull_request:
     branches:
-      - 'develop'
+      - develop
 
 jobs:
   build:
