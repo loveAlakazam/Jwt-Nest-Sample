@@ -1,0 +1,30 @@
+name: Deploy Development
+on:
+  pull_request:
+    branches:
+      - 'develop'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    # 액션 실행내용
+    steps:
+      - name: Get Current Date
+        id: current-time
+        run: echo "::set-output name=date::$(date +KST%Y%m%d-T%H%M%S.%3N)"
+        env:
+          TZ: Asia/Seoul
+
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      - name: Create env
+        run: |
+          touch .env
+          echo NODE_ENV=development >> .env
+          echo SERVER_PORT=${{ secrets.SERVER_PORT }} >> .env
+          cat .env
