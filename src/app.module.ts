@@ -9,6 +9,8 @@ import { UsersModule } from './users/users.module';
 import * as Joi from 'joi';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MysqlConfigService } from './mysql/mysql.config.service';
+import { APP_FILTER } from '@nestjs/core';
+import { HttpExceptionFilter } from './error/http-exception.filter';
 
 @Module({
   imports: [
@@ -33,6 +35,9 @@ import { MysqlConfigService } from './mysql/mysql.config.service';
     UsersModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    { provide: APP_FILTER, useClass: HttpExceptionFilter },
+  ],
 })
 export class AppModule {}
