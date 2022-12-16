@@ -4,7 +4,11 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MysqlConfigModule } from './mysql/mysql.config.module';
 import { AuthModule } from './auth/auth.module';
+import { UsersService } from './users/users.service';
+import { UsersModule } from './users/users.module';
 import * as Joi from 'joi';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { MysqlConfigService } from './mysql/mysql.config.service';
 
 @Module({
   imports: [
@@ -21,8 +25,12 @@ import * as Joi from 'joi';
         MYSQL_DATABASE: Joi.string().required(),
       }),
     }),
-    MysqlConfigModule,
+    TypeOrmModule.forRootAsync({
+      imports: [MysqlConfigModule],
+      useClass: MysqlConfigService,
+    }),
     AuthModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
