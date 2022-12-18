@@ -1,16 +1,15 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { APP_FILTER } from '@nestjs/core';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MysqlConfigModule } from './mysql/mysql.config.module';
 import { AuthModule } from './auth/auth.module';
-import { UsersService } from './users/users.service';
 import { UsersModule } from './users/users.module';
-import * as Joi from 'joi';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { MysqlConfigService } from './mysql/mysql.config.service';
-import { APP_FILTER } from '@nestjs/core';
 import { HttpExceptionFilter } from './error/http-exception.filter';
+import * as Joi from 'joi';
 
 @Module({
   imports: [
@@ -25,6 +24,8 @@ import { HttpExceptionFilter } from './error/http-exception.filter';
         MYSQL_USERNAME: Joi.string().required(),
         MYSQL_PASSWORD: Joi.string().required(),
         MYSQL_DATABASE: Joi.string().required(),
+        JWT_SECRET_KEY: Joi.string().required(),
+        IS_PUBLIC_KEY: Joi.string().required(),
       }),
     }),
     TypeOrmModule.forRootAsync({
