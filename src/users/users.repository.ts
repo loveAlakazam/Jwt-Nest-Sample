@@ -13,4 +13,8 @@ export class UsersRepository {
   async findOneByName(name: string) {
     return await this.usersRepository.findOneBy({ name: name });
   }
+
+  async findAll() {
+    return await this.usersRepository.find();
+  }
 }
