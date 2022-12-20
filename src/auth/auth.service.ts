@@ -22,8 +22,9 @@ export class AuthService {
 
   async login(user: User) {
     const payload = { username: user.name, sub: user.id };
-    return {
-      access_token: this.jwtService.sign(payload),
-    };
+
+    // 토큰을 반환하여 쿠키에 저장
+    const token = this.jwtService.sign(payload);
+    return token;
   }
 }
