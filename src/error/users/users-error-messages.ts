@@ -7,4 +7,8 @@ export const UsersErrorMessages = {
     code: 404,
     message: '존재하지 않는 회원입니다.',
   },
+  ALREADY_USER_EXIST: {
+    code: 400,
+    message: '이미 존재하는 유저입니다.',
+  },
 };
