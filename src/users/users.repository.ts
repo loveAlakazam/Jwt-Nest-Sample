@@ -28,13 +28,6 @@ export class UsersRepository {
   }
 
   async createNewUser(user: CreateUserRequestDto) {
-    const result = await this.usersRepository
-      .createQueryBuilder('users')
-      .insert()
-      .into(Users)
-      .values({ ...user })
-      .execute();
-
-    return result;
+    return await this.usersRepository.save(user);
   }
 }
