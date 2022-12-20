@@ -7,12 +7,14 @@ import { FailedValidate } from 'src/error/users/users-exception';
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
   constructor(private authService: AuthService) {
-    super();
+    super({
+      usernameField: 'email',
+    });
   }
 
-  async validate(username: string, password: string): Promise<any> {
+  async validate(email: string, password: string): Promise<any> {
     //  validateUser: passport에서 사용자가 존재하고 유효한지 확인
-    const user = await this.authService.validateUser(username, password);
+    const user = await this.authService.validateUser(email, password);
     if (!user) {
       throw new FailedValidate();
     }
