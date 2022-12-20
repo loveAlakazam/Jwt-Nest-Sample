@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { UsersRepository } from './users.repository';
 import { CreateUserRequestDto } from './dto/create-user-request.dto';
+import { NotFoundUser } from 'src/error/users/users-exception';
 
 @Injectable()
 export class UsersService {
@@ -15,7 +16,17 @@ export class UsersService {
   }
 
   async findUserByEmail(email: string) {
-    return await this.usersRepository.getByEmail(email);
+    try {
+      const user = await this.usersRepository.getByEmail(email);
+
+      if (user) {
+        return user;
+      }
+
+      throw new NotFoundUser();
+    } catch (error) {
+      throw error;
+    }
   }
 
   async findUserById(id: number) {
