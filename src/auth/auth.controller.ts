@@ -1,8 +1,9 @@
-import { Controller, Post, UseGuards, Req, Res } from '@nestjs/common';
+import { Controller, Post, UseGuards, Req, Res, Body } from '@nestjs/common';
 import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
-import { Public } from 'src/decorators/public.decorator';
+import { Public } from '../decorators/public.decorator';
+import { Users } from '../entity/User.entity';
 
 @Controller('auth')
 export class AuthController {
@@ -20,8 +21,14 @@ export class AuthController {
       domain: 'localhost',
       path: '/',
       httpOnly: true,
-      maxAge: 60 * 60 * 1000, // 60분
+      maxAge: 60 * 1000, // 1분
     });
     return this.authService.login(req.user);
+  }
+
+  @Public()
+  @Post('register')
+  async register(@Body() user: Users) {
+    return this.authService.register(user);
   }
 }

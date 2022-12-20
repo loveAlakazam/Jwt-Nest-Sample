@@ -24,10 +24,4 @@ export class UsersController {
   async findUserById(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.findUserById(id);
   }
-
-  @Public()
-  @Post()
-  async createNewUser(@Body() user: CreateUserRequestDto): Promise<void> {
-    await this.usersService.createNewUser(user);
-  }
 }
