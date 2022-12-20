@@ -17,10 +17,10 @@ import * as Joi from 'joi';
       envFilePath: '.env',
       isGlobal: true,
       validationSchema: Joi.object({
-        SERVER_PORT: Joi.string().required(),
+        SERVER_PORT: Joi.number().default(3000).required(),
         NODE_ENV: Joi.string().required(),
         MYSQL_HOST: Joi.string().required(),
-        MYSQL_PORT: Joi.string().required(),
+        MYSQL_PORT: Joi.number().required(),
         MYSQL_USERNAME: Joi.string().required(),
         MYSQL_PASSWORD: Joi.string().required(),
         MYSQL_DATABASE: Joi.string().required(),
