@@ -11,6 +11,6 @@ import { UsersController } from './users.controller';
   providers: [UsersService, UsersRepository],
 
   /** auth 모듈에서 jwt 인증을 하기위해 UsersService가 필요함 */
-  exports: [UsersService],
+  exports: [UsersService, UsersRepository],
 })
 export class UsersModule {}
