@@ -18,6 +18,10 @@ export class UsersService {
     return await this.usersRepository.getByEmail(email);
   }
 
+  async findUserById(id: number) {
+    return await this.usersRepository.getById(id);
+  }
+
   async createNewUser(user: CreateUserRequestDto) {
     return await this.usersRepository.createNewUser(user);
   }

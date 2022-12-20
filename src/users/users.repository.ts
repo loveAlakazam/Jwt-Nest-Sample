@@ -19,6 +19,10 @@ export class UsersRepository {
     return await this.usersRepository.findOneBy({ email: email });
   }
 
+  async getById(id: number) {
+    return await this.usersRepository.findOneBy({ id: id });
+  }
+
   async getAll() {
     return await this.usersRepository.find();
   }
