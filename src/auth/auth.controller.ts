@@ -20,6 +20,7 @@ export class AuthController {
       domain: 'localhost',
       path: '/',
       httpOnly: true,
+      maxAge: 60 * 60 * 1000, // 60분
     });
     return this.authService.login(req.user);
   }
