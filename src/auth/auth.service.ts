@@ -77,7 +77,9 @@ export class AuthService {
     const payload = { id };
     const token = this.jwtService.sign(payload, {
       secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET'),
-      expiresIn: this.configService.get('JWT_ACCESS_TOKEN_EXPIRATION_TIME'),
+      expiresIn: `${this.configService.get(
+        'JWT_ACCESS_TOKEN_EXPIRATION_TIME',
+      )}s`,
     });
 
     // accessToken 담은 쿠키 리턴
@@ -86,9 +88,9 @@ export class AuthService {
       domain: 'localhost',
       path: '/',
       httpOnly: true,
-      maxAge: Number(
-        this.configService.get<number>('JWT_ACCESS_TOKEN_EXPIRATION_TIME'),
-      ),
+      maxAge:
+        this.configService.get<number>('JWT_ACCESS_TOKEN_EXPIRATION_TIME') *
+        1000,
     };
   }
 
@@ -99,7 +101,9 @@ export class AuthService {
     const payload = { id };
     const token = this.jwtService.sign(payload, {
       secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET'),
-      expiresIn: +this.configService.get('JWT_REFRESH_TOKEN_EXPIRATION_TIME'),
+      expiresIn: `${this.configService.get(
+        'JWT_REFRESH_TOKEN_EXPIRATION_TIME',
+      )}s`,
     });
 
     // refreshToken 저장된 쿠키 리턴
@@ -108,9 +112,9 @@ export class AuthService {
       domain: 'localhost',
       path: '/',
       httpOnly: true,
-      maxAge: Number(
-        this.configService.get('JWT_REFRESH_TOKEN_EXPIRATION_TIME'),
-      ),
+      maxAge:
+        this.configService.get<number>('JWT_REFRESH_TOKEN_EXPIRATION_TIME') *
+        1000,
     };
   }
 
