@@ -34,7 +34,7 @@ export class UsersService {
 
   async findUserById(id: number) {
     try {
-      const user = await this.usersRepository.getById(id);
+      const user = await this.usersRepository.getUserInfoWithoutPassword(id);
       if (user) {
         return user;
       }
@@ -51,7 +51,7 @@ export class UsersService {
 
   /**
    * setRefreshToken
-   * : RefreshToken을 암호화하여 저장
+   * : RefreshToken을 암호화하여 DB에 저장
    */
   async setRefreshToken(refreshToken: string, id: number) {
     const hashedRefreshToken = await hash(refreshToken, 10);
