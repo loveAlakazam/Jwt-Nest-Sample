@@ -30,7 +30,16 @@ export class UsersService {
   }
 
   async findUserById(id: number) {
-    return await this.usersRepository.getById(id);
+    try {
+      const user = await this.usersRepository.getById(id);
+      if (user) {
+        return user;
+      }
+
+      throw new NotFoundUser();
+    } catch (error) {
+      throw error;
+    }
   }
 
   async createNewUser(user: CreateUserRequestDto) {
