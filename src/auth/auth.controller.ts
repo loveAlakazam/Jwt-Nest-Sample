@@ -26,6 +26,12 @@ export class AuthController {
     return this.authService.login(req.user);
   }
 
+  @Post('logout')
+  async logOut(@Res({ passthrough: true }) res: Response) {
+    const { token, ...option } = await this.authService.logout();
+    res.cookie('Authentication', token, option);
+  }
+
   @Public()
   @Post('register')
   async register(@Body() user: Users) {
