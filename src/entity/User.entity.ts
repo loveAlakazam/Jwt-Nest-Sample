@@ -1,4 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Exclude } from 'class-transformer';
 
 @Entity({ schema: 'jwt_test', name: 'users' })
 export class Users {
@@ -14,6 +15,10 @@ export class Users {
   @Column()
   password: string;
 
-  @Column({ default: false })
-  isActive: boolean;
+  @Column({ nullable: true, default: null, comment: 'access 토큰' })
+  accessToken: string;
+
+  @Column({ nullable: true, default: null, comment: '암호화된 refresh 토큰' })
+  @Exclude()
+  refreshToken?: string;
 }
