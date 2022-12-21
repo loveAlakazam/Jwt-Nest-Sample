@@ -5,6 +5,7 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Request,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { Public } from '../decorators/public.decorator';
@@ -14,7 +15,6 @@ import { CreateUserRequestDto } from './dto/create-user-request.dto';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Public()
   @Get()
   async findAll() {
     return this.usersService.findAll();
@@ -23,5 +23,10 @@ export class UsersController {
   @Get(':id')
   async findUserById(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.findUserById(id);
+  }
+
+  @Get('profile')
+  getProfile(@Request() req) {
+    return req.user;
   }
 }
