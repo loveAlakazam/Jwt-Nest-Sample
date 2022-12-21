@@ -11,6 +11,7 @@ import { MysqlConfigService } from './mysql/mysql.config.service';
 import { HttpExceptionFilter } from './error/http-exception.filter';
 import * as Joi from 'joi';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
         MYSQL_DATABASE: Joi.string().required(),
         JWT_SECRET_KEY: Joi.string().required(),
         IS_PUBLIC_KEY: Joi.string().required(),
+        JWT_EXPIRATION_TIME: Joi.number().required(),
       }),
     }),
     TypeOrmModule.forRootAsync({
