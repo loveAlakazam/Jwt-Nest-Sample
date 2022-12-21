@@ -21,14 +21,20 @@ import { JwtModule } from '@nestjs/jwt';
       validationSchema: Joi.object({
         SERVER_PORT: Joi.number().default(3000).required(),
         NODE_ENV: Joi.string().required(),
+        /* MYSQL */
         MYSQL_HOST: Joi.string().required(),
         MYSQL_PORT: Joi.number().required(),
         MYSQL_USERNAME: Joi.string().required(),
         MYSQL_PASSWORD: Joi.string().required(),
         MYSQL_DATABASE: Joi.string().required(),
+        /* JWT */
         JWT_SECRET_KEY: Joi.string().required(),
-        IS_PUBLIC_KEY: Joi.string().required(),
         JWT_EXPIRATION_TIME: Joi.number().required(),
+        IS_PUBLIC_KEY: Joi.string().required(),
+        JWT_ACCESS_TOKEN_SECRET: Joi.string().required(),
+        JWT_ACCESS_TOKEN_EXPIRATION_TIME: Joi.number().required(),
+        JWT_REFRESH_TOKEN_SECRET: Joi.string().required(),
+        JWT_REFRESH_TOKEN_EXPIRATION_TIME: Joi.number().required(),
       }),
     }),
     TypeOrmModule.forRootAsync({
