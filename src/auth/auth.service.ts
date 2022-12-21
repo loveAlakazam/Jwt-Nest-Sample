@@ -8,13 +8,15 @@ import {
   FailedValidate,
 } from '../error/users/users-exception';
 import { UsersRepository } from '../users/users.repository';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private usersRepository: UsersRepository,
-    private usersService: UsersService,
-    private jwtService: JwtService,
+    private readonly usersRepository: UsersRepository,
+    private readonly usersService: UsersService,
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
   ) {}
 
   async validateUser(email: string, plainTextPassword: string): Promise<any> {
@@ -26,14 +28,14 @@ export class AuthService {
         return validateUser;
       }
 
-      await this.varifyPassword(plainTextPassword, user.password);
+      await this.verifyPassword(plainTextPassword, user.password);
       return validateUser;
     } catch (error) {
       throw error;
     }
   }
 
-  private async varifyPassword(
+  private async verifyPassword(
     plainTextPassword: string,
     hashedPassword: string,
   ) {
@@ -44,14 +46,9 @@ export class AuthService {
     return;
   }
 
-  async login(user: Users) {
-    const payload = { email: user.email, sub: user.id };
-
-    // 토큰을 반환하여 쿠키에 저장
-    const token = this.jwtService.sign(payload);
-    return token;
-  }
-
+  /**
+   * 회원가입
+   */
   async register(user: Users) {
     const hashedPassword = await hash(user.password, 10);
 
@@ -72,4 +69,91 @@ export class AuthService {
       throw new error();
     }
   }
+
+  /**
+   * AccessToken을 발급
+   */
+  getCookieWithJwtAccessToken(id: number) {
+    const payload = { id };
+    const token = this.jwtService.sign(payload, {
+      secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET'),
+      expiresIn: this.configService.get('JWT_ACCESS_TOKEN_EXPIRATION_TIME'),
+    });
+
+    // accessToken 담은 쿠키 리턴
+    return {
+      accessToken: token,
+      domain: 'localhost',
+      path: '/',
+      httpOnly: true,
+      maxAge: Number(
+        this.configService.get<number>('JWT_ACCESS_TOKEN_EXPIRATION_TIME'),
+      ),
+    };
+  }
+
+  /**
+   * RefreshToken을 발급
+   */
+  getCookieWithJwtRefreshToken(id: number) {
+    const payload = { id };
+    const token = this.jwtService.sign(payload, {
+      secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET'),
+      expiresIn: +this.configService.get('JWT_REFRESH_TOKEN_EXPIRATION_TIME'),
+    });
+
+    // refreshToken 저장된 쿠키 리턴
+    return {
+      refreshToken: token,
+      domain: 'localhost',
+      path: '/',
+      httpOnly: true,
+      maxAge: Number(
+        this.configService.get('JWT_REFRESH_TOKEN_EXPIRATION_TIME'),
+      ),
+    };
+  }
+
+  /**
+   * 로그아웃할 때
+   * 현재 쿠키에 빈쿠키클르 기입하기 위한 값을 반환.
+   */
+  getCookiesForLogOut() {
+    return {
+      accessTokenOption: {
+        domain: 'localhost',
+        path: '/',
+        httpOnly: true,
+        maxAge: 0,
+      },
+      refreshTokenOption: {
+        domain: 'localhost',
+        path: '/',
+        httpOnly: true,
+        maxAge: 0,
+      },
+    };
+  }
+
+  /*
+  //로그인
+  async login(user: Users) {
+    const payload = { email: user.email, sub: user.id };
+
+    // 토큰을 반환하여 쿠키에 저장
+    const token = this.jwtService.sign(payload);
+    return token;
+  }
+
+  // 로그아웃
+  async logout() {
+    return {
+      token: '',
+      domain: 'localhost',
+      path: '/',
+      httpOnly: true,
+      maxAge: 0,
+    };
+  }
+  */
 }
