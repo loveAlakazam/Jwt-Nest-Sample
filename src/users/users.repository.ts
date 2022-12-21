@@ -56,6 +56,7 @@ export class UsersRepository {
       .set({
         refreshToken: refreshToken,
       })
-      .where('id = :id', { id: id });
+      .where('id = :id', { id: id })
+      .execute();
   }
 }
