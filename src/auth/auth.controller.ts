@@ -41,7 +41,6 @@ export class AuthController {
     return user;
   }
 
-  @Public()
   @UseGuards(JwtRefreshGuard)
   @Post('logout')
   async logOut(@Req() req, @Res({ passthrough: true }) res: Response) {
@@ -67,7 +66,6 @@ export class AuthController {
    * - JwtRefreshGuard에 의해 쿠키의 RefreshToken이 유저의 db테이블의 RefreshToken과 일치한지 확인
    * - 이후에 AccessToken을 발급받는다.
    */
-  @Public()
   @UseGuards(JwtRefreshGuard)
   @Get('refresh')
   refresh(@Req() req, @Res({ passthrough: true }) res: Response) {
