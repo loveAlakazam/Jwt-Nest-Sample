@@ -1,12 +1,24 @@
-# JWT 토큰 & OAuth2.0 인증과 GraphQL 과 PubSub 만들기
+# JWT 토큰기반 인증 학습
 
-- 목표: NestJS 다큐먼트를 읽으면서 응용하여 학습하기
-  - 다큐먼트를 읽으면서 스스로 개발스택을 학습하고자 한다.
-  - 이전에 경험하지 못한 기술스택(GraphQL, JWT)를 학습한다.
+- 학습목표
+  - [x] passport를 활용한 JWT 토큰 기반의 인증로직 구현하기
+  - [x] Refresh 토큰인증 로직 구현하기
+  - [x] 쿠키에 저장하여 토큰 인증하기
+  - [] 소셜로그인
+  
 
-<br>
+## [v1.0.1](https://github.com/loveAlakazam/Jwt-Nest-Sample/tree/product.v1.0.1 
 
-- Multiple Databases
 
-  - MySQL & GraphQL
-  - [NestJS 공식다큐먼트](https://docs.nestjs.com/techniques/database#multiple-databases)
+- 학습목표
+  - [x] passport를 활용한 JWT 토큰 기반의 인증로직 구현하기
+  - [x] Refresh 토큰인증 로직 구현하기
+  - [x] 저장된 access/refresh 토큰을 쿠키에 저장하여 토큰인증하기
+  - [] 소셜로그인
+    - [] 구글
+    - [] 네이버
+    - [] 카카오
+    - [] 깃허브
+  - [] nodemailer를 이용하여 메일인증하기
+  
+## v1.0.2
