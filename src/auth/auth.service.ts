@@ -24,9 +24,6 @@ export class AuthService {
       const user = await this.usersRepository.getByEmail(email);
 
       const { password, ...validateUser } = user;
-      if (user && password === user.password) {
-        return validateUser;
-      }
 
       await this.verifyPassword(plainTextPassword, user.password);
       return validateUser;
