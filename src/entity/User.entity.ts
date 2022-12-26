@@ -15,9 +15,6 @@ export class Users {
   @Column()
   password: string;
 
-  @Column({ nullable: true, default: null, comment: 'access 토큰' })
-  accessToken: string;
-
   @Column({ nullable: true, default: null, comment: '암호화된 refresh 토큰' })
   @Exclude()
   refreshToken?: string;
