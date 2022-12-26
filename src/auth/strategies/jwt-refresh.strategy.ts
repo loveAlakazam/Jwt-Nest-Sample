@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { UsersService } from 'src/users/users.service';
+import { AuthService } from '../auth.service';
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(
@@ -11,7 +11,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
 ) {
   constructor(
     private readonly configService: ConfigService,
-    private readonly usersService: UsersService,
+    private readonly authService: AuthService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
@@ -27,6 +27,6 @@ export class JwtRefreshStrategy extends PassportStrategy(
   async validate(req, payload: any) {
     // RefreshToken이 유효한지 확인후에 유저정보를 반환.
     const refreshToken = req.cookies?.Refresh;
-    return this.usersService.checkVerifyRefreshToken(refreshToken, payload.id);
+    return this.authService.checkVerifyRefreshToken(refreshToken, payload.id);
   }
 }

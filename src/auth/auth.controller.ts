@@ -12,15 +12,11 @@ import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { Public } from '../decorators/public.decorator';
 import { Users } from '../entity/User.entity';
-import { UsersService } from 'src/users/users.service';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
 
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly usersService: UsersService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Public()
   @UseGuards(LocalAuthGuard)
@@ -37,7 +33,7 @@ export class AuthController {
       await this.authService.getCookieWithJwtRefreshToken(user.id);
 
     // refreshToken값을 db에 저장
-    await this.usersService.setRefreshToken(refreshToken, user.id);
+    await this.authService.setRefreshToken(refreshToken, user.id);
 
     res.cookie('Authentication', accessToken, accessTokenOption);
     res.cookie('Refresh', refreshToken, refreshTOkenOption);
@@ -52,7 +48,7 @@ export class AuthController {
     const { accessTokenOption, refreshTokenOption } =
       await this.authService.getCookiesForLogOut();
 
-    await this.usersService.removeRefreshToken(req.user.id);
+    await this.authService.removeRefreshToken(req.user.id);
 
     // accessToken, refreshToken 값을 없앤다.
     res.cookie('Authentication', '', accessTokenOption);

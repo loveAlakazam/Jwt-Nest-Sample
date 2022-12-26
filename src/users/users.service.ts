@@ -48,37 +48,4 @@ export class UsersService {
   async createNewUser(user: CreateUserRequestDto) {
     return await this.usersRepository.createNewUser(user);
   }
-
-  /**
-   * setRefreshToken
-   * : RefreshToken을 암호화하여 DB에 저장
-   */
-  async setRefreshToken(refreshToken: string, id: number) {
-    const hashedRefreshToken = await hash(refreshToken, 10);
-    await this.usersRepository.updateUserRefreshToken(id, hashedRefreshToken);
-  }
-
-  /**
-   * checkVerifyRefreshToken
-   * : 유저의 고유번호를 이용하여 데이터를 조회하고 RefreshToken이 유효한지 확인
-   */
-  async checkVerifyRefreshToken(refreshToken: string, id: number) {
-    const user = await this.usersRepository.getUserInfoWithoutPassword(id);
-
-    // 데이터베이스에 저장된 암호화된 refreshToken과 비교하여, 토큰이 일치한지 확인
-    const isRefreshTokenMatch = await compare(refreshToken, user.refreshToken);
-
-    // 토큰이 일치하다면 현재 로그인한 유저정보를 리턴
-    if (isRefreshTokenMatch) {
-      return user;
-    }
-  }
-
-  /**
-   * removeRefreshToken
-   * : 로그아웃할 때 사용. refreshToken 값을 null 로 한다.
-   */
-  async removeRefreshToken(id: number) {
-    return this.usersRepository.updateUserRefreshToken(id, null);
-  }
 }
