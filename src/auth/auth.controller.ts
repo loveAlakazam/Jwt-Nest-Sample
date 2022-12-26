@@ -35,8 +35,8 @@ export class AuthController {
     // refreshToken값을 db에 저장
     await this.authService.setRefreshToken(refreshToken, user.id);
 
-    res.cookie('Authentication', accessToken, accessTokenOption);
-    res.cookie('Refresh', refreshToken, refreshTOkenOption);
+    res.cookie('access_token', accessToken, accessTokenOption);
+    res.cookie('refresh_token', refreshToken, refreshTOkenOption);
 
     return user;
   }
@@ -51,8 +51,8 @@ export class AuthController {
     await this.authService.removeRefreshToken(req.user.id);
 
     // accessToken, refreshToken 값을 없앤다.
-    res.cookie('Authentication', '', accessTokenOption);
-    res.cookie('Refresh', '', refreshTokenOption);
+    res.cookie('access_token', '', accessTokenOption);
+    res.cookie('refresh_token', '', refreshTokenOption);
   }
 
   // 회원가입
@@ -75,7 +75,8 @@ export class AuthController {
     const { accessToken, ...accessTokenOption } =
       this.authService.getCookieWithJwtAccessToken(user.id);
 
-    res.cookie('Authentication', accessToken, accessTokenOption);
+    // RefreshToken 확인 후에 새로운 accessToken 을 발급
+    res.cookie('access_token', accessToken, accessTokenOption);
     return user;
   }
 }
