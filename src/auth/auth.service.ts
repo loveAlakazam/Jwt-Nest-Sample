@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Req } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { Users } from '../entity/User.entity';
@@ -167,6 +167,18 @@ export class AuthService {
    */
   async removeRefreshToken(id: number) {
     return this.usersRepository.updateUserRefreshToken(id, null);
+  }
+
+  // 구글로그인
+  async googleLogin(@Req() req) {
+    if (!req.user) {
+      return 'No User from Google';
+    }
+
+    return {
+      message: 'User Information from google',
+      user: req.user,
+    };
   }
 
   /*

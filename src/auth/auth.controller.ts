@@ -13,6 +13,7 @@ import { LocalAuthGuard } from './guards/local-auth.guard';
 import { Public } from '../decorators/public.decorator';
 import { Users } from '../entity/User.entity';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
 export class AuthController {
@@ -77,4 +78,18 @@ export class AuthController {
     res.cookie('access_token', accessToken, accessTokenOption);
     return user;
   }
+
+  // 구글로그인 리다이렉트
+  @Public()
+  @Get('google/redirect')
+  @UseGuards(AuthGuard('google'))
+  async googleLoginRedirect(@Req() req) {
+    return this.authService.googleLogin(req);
+  }
+
+  // 구글로그인
+  @Public()
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  async googleLogin(@Req() req) {}
 }
