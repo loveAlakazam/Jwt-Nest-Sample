@@ -14,7 +14,9 @@ import { Public } from '../decorators/public.decorator';
 import { Users } from '../entity/User.entity';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
 import { AuthGuard } from '@nestjs/passport';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -22,6 +24,7 @@ export class AuthController {
   @Public()
   @UseGuards(LocalAuthGuard)
   @Post('login')
+  @ApiOperation({ summary: '로그인 API' })
   async login(@Req() req, @Res({ passthrough: true }) res: Response) {
     const user = req.user;
 
@@ -44,6 +47,7 @@ export class AuthController {
 
   @UseGuards(JwtRefreshGuard)
   @Post('logout')
+  @ApiOperation({ summary: '로그아웃 API' })
   async logOut(@Req() req, @Res({ passthrough: true }) res: Response) {
     const { accessTokenOption, refreshTokenOption } =
       await this.authService.getCookiesForLogOut();
@@ -58,6 +62,7 @@ export class AuthController {
   // 회원가입
   @Public()
   @Post('register')
+  @ApiOperation({ summary: '회원가입 API' })
   async register(@Body() user: Users) {
     return this.authService.register(user);
   }
@@ -69,6 +74,7 @@ export class AuthController {
    */
   @UseGuards(JwtRefreshGuard)
   @Get('refresh')
+  @ApiOperation({ summary: '토큰 갱신 API' })
   refresh(@Req() req, @Res({ passthrough: true }) res: Response) {
     const user = req.user;
     const { accessToken, ...accessTokenOption } =
@@ -83,6 +89,7 @@ export class AuthController {
   @Public()
   @Get('google/redirect')
   @UseGuards(AuthGuard('google'))
+  @ApiOperation({ summary: '구글 로그인 콜백 및 인증' })
   async googleLoginRedirect(@Req() req) {
     return this.authService.googleLogin(req);
   }
@@ -91,5 +98,6 @@ export class AuthController {
   @Public()
   @Get('google')
   @UseGuards(AuthGuard('google'))
+  @ApiOperation({ summary: '구글 로그인 API' })
   async googleLogin(@Req() req) {}
 }
