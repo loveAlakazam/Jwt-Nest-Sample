@@ -6,98 +6,102 @@ import {
   Res,
   Body,
   Get,
+  Delete,
+  HttpCode,
+  UseFilters,
 } from '@nestjs/common';
-import { Response } from 'express';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ConfigService } from '@nestjs/config';
+import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
-import { Public } from '../decorators/public.decorator';
-import { Users } from '../entity/User.entity';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
-import { AuthGuard } from '@nestjs/passport';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { User } from '../decorators/user.decorator';
+import { CreateUserDto } from '../users/dto/create-user.dto';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { HttpExceptionFilter } from '../error/http-exception.filter';
+import { GoogleAuthGuard } from './guards/google-auth.guard';
 
 @ApiTags('Auth')
+@UseFilters(HttpExceptionFilter)
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly authService: AuthService,
+  ) {}
 
-  @Public()
-  @UseGuards(LocalAuthGuard)
-  @Post('login')
-  @ApiOperation({ summary: '로그인 API' })
-  async login(@Req() req, @Res({ passthrough: true }) res: Response) {
-    const user = req.user;
-
-    // 쿠키에서 accessToken 발급 받는다.
-    const { accessToken, ...accessTokenOption } =
-      await this.authService.getCookieWithJwtAccessToken(user.id);
-
-    // 쿠키에서 refreshToken 발급 받는다.
-    const { refreshToken, ...refreshTOkenOption } =
-      await this.authService.getCookieWithJwtRefreshToken(user.id);
-
-    // refreshToken값을 db에 저장
-    await this.authService.setRefreshToken(refreshToken, user.id);
-
-    res.cookie('access_token', accessToken, accessTokenOption);
-    res.cookie('refresh_token', refreshToken, refreshTOkenOption);
-
-    return user;
-  }
-
-  @UseGuards(JwtRefreshGuard)
-  @Post('logout')
-  @ApiOperation({ summary: '로그아웃 API' })
-  async logOut(@Req() req, @Res({ passthrough: true }) res: Response) {
-    const { accessTokenOption, refreshTokenOption } =
-      await this.authService.getCookiesForLogOut();
-
-    await this.authService.removeRefreshToken(req.user.id);
-
-    // accessToken, refreshToken 값을 없앤다.
-    res.cookie('access_token', '', accessTokenOption);
-    res.cookie('refresh_token', '', refreshTokenOption);
-  }
-
-  // 회원가입
-  @Public()
-  @Post('register')
   @ApiOperation({ summary: '회원가입 API' })
-  async register(@Body() user: Users) {
-    return this.authService.register(user);
+  @Post('register')
+  async register(@Body() data: CreateUserDto) {
+    return await this.authService.register(data);
   }
 
-  // 토큰 갱신
-  /**
-   * - JwtRefreshGuard에 의해 쿠키의 RefreshToken이 유저의 db테이블의 RefreshToken과 일치한지 확인
-   * - 이후에 AccessToken을 발급받는다.
-   */
-  @UseGuards(JwtRefreshGuard)
-  @Get('refresh')
-  @ApiOperation({ summary: '토큰 갱신 API' })
-  refresh(@Req() req, @Res({ passthrough: true }) res: Response) {
-    const user = req.user;
-    const { accessToken, ...accessTokenOption } =
-      this.authService.getCookieWithJwtAccessToken(user.id);
+  @HttpCode(200)
+  @ApiOperation({ summary: '로그인 API' })
+  @UseGuards(LocalAuthGuard) // 로그인할때 입력정보가 올바른지 검증하는 가드
+  @Post('login')
+  async signIn(
+    @User() user,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { accessToken, refreshToken, ...userInfo } = user;
 
-    // RefreshToken 확인 후에 새로운 accessToken 을 발급
-    res.cookie('access_token', accessToken, accessTokenOption);
-    return user;
+    // accssToken을 담은 쿠키 생성
+    res.cookie('accessToken', accessToken, { httpOnly: true });
+
+    // refreshToken을 담은 쿠키 생성
+    res.cookie('refreshToken', refreshToken, { httpOnly: true });
+
+    return {
+      message: 'Login Success',
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+      ...userInfo,
+    };
   }
 
-  // 구글로그인 리다이렉트
-  @Public()
-  @Get('google/redirect')
-  @UseGuards(AuthGuard('google'))
-  @ApiOperation({ summary: '구글 로그인 콜백 및 인증' })
-  async googleLoginRedirect(@Req() req) {
-    return this.authService.googleLogin(req);
+  @HttpCode(200)
+  @ApiOperation({ summary: '로그아웃 API' })
+  @UseGuards(JwtAuthGuard)
+  @Get('logout')
+  async signOut(@User() user, @Req() req: Request, @Res() res: Response) {
+    // 1. refreshToken값을 null 로 변경한다.
+    await this.authService.signOut(user.id);
+
+    // 2. 로컬존재하는 쿠키의 유효시간을 만료시킨다.
+    res.cookie('accessToken', '', { maxAge: 0 });
+    res.cookie('refreshToken', '', { maxAge: 0 });
+
+    return res.status(200).json({ message: 'Logout Success' });
   }
 
-  // 구글로그인
-  @Public()
+  @ApiOperation({
+    summary: '구글 로그인 - googleAuthGuard로부터 로그인 리다이렉션 URL을 호출',
+  })
+  @UseGuards(GoogleAuthGuard)
   @Get('google')
-  @UseGuards(AuthGuard('google'))
-  @ApiOperation({ summary: '구글 로그인 API' })
-  async googleLogin(@Req() req) {}
+  async GoogleLogin(@Req() req: Request) {
+    return;
+  }
+
+  @ApiOperation({
+    summary: '구글로그인 리다이렉션',
+  })
+  @UseGuards(GoogleAuthGuard)
+  @Get('google/redirect')
+  async GoogleLoginRedirect(
+    @User() user,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    // 쿠키에 accssToken 저장
+    res.cookie('accssToken', user.accessToken, { httpOnly: true });
+
+    // 쿠키에 refreshToken 저장
+    res.cookie('refreshToken', user.refreshToken, { httpOnly: true });
+
+    return { message: 'Login With Google Success!', ...user };
+  }
 }
