@@ -1,38 +1,43 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { Request } from 'express';
+import { UsersErrorMessages } from '../../error/users/users-error-messages';
 import { UsersService } from 'src/users/users.service';
-import { Request as RequestType } from 'express';
-
-type Payload = {
-  id: number;
-};
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
     private readonly configService: ConfigService,
-    private readonly userService: UsersService,
+    private readonly usersService: UsersService,
   ) {
     super({
+      // jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       jwtFromRequest: ExtractJwt.fromExtractors([
-        JwtStrategy.extractJWT,
-        ExtractJwt.fromAuthHeaderAsBearerToken(),
+        (request: Request) => {
+          const data = request?.cookies?.accessToken;
+
+          if (!data) {
+            return null;
+          }
+          return data;
+        },
       ]),
       secretOrKey: configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
     });
   }
 
-  async validate(payload: Payload) {
-    console.log(typeof payload.id);
-    return await this.userService.findUserById(payload.id);
-  }
-
-  private static extractJWT(req: RequestType): string | null {
-    if (req.cookies && 'access_token' in req.cookies) {
-      return req.cookies.access_token;
+  async validate(payload: any) {
+    // 쿠키에서 토큰을 읽어서 접속이 성공여부를 payload의 값이 담당한다.
+    if (!payload) {
+      throw new UnauthorizedException(UsersErrorMessages.ACCESS_DENY);
     }
-    return null;
+
+    // payload.sub 에 해당하는 유저정보를 리스폰스한다.
+    const userId = payload.sub;
+
+    const loginUserInfo = await this.usersService.findUserById(userId);
+    return loginUserInfo;
   }
 }
