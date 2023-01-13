@@ -1,9 +1,9 @@
-import { Injectable, UseFilters } from '@nestjs/common';
+import { Injectable, NotFoundException, UseFilters } from '@nestjs/common';
 import { UsersRepository } from './users.repository';
-import { CreateUserRequestDto } from './dto/create-user-request.dto';
-import { NotFoundUser } from 'src/error/users/users-exception';
-import { compare, hash } from 'bcrypt';
+import { CreateUserDto } from './dto/create-user.dto';
 import { HttpExceptionFilter } from 'src/error/http-exception.filter';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { UsersErrorMessages } from '../error/users/users-error-messages';
 
 @UseFilters(new HttpExceptionFilter())
 @Injectable()
@@ -20,13 +20,7 @@ export class UsersService {
 
   async findUserByEmail(email: string) {
     try {
-      const user = await this.usersRepository.getByEmail(email);
-
-      if (user) {
-        return user;
-      }
-
-      throw new NotFoundUser();
+      return await this.usersRepository.getByEmail(email);
     } catch (error) {
       throw error;
     }
@@ -34,18 +28,22 @@ export class UsersService {
 
   async findUserById(id: number) {
     try {
-      const user = await this.usersRepository.getUserInfoWithoutPassword(id);
-      if (user) {
-        return user;
+      const user = await this.usersRepository.getById(id);
+      if (!user) {
+        throw new NotFoundException(UsersErrorMessages.NOT_FOUND_USER);
       }
 
-      throw new NotFoundUser();
+      return user;
     } catch (error) {
       throw error;
     }
   }
 
-  async createNewUser(user: CreateUserRequestDto) {
-    return await this.usersRepository.createNewUser(user);
+  async create(user: CreateUserDto) {
+    return await this.usersRepository.create(user);
+  }
+
+  async update(userId: number, user: UpdateUserDto) {
+    return await this.usersRepository.update(userId, user);
   }
 }
