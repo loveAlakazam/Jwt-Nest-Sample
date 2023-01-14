@@ -22,6 +22,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { HttpExceptionFilter } from '../error/http-exception.filter';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { KakaoAuthGuard } from './guards/kakao-auth.guard';
+import { NaverAuthGuard } from './guards/naver-auth.guard';
 
 @ApiTags('Auth')
 @UseFilters(HttpExceptionFilter)
@@ -123,5 +124,31 @@ export class AuthController {
     res.cookie('accessToken', user.accessToken, { httpOnly: true });
     res.cookie('refreshToken', user.refreshToken, { httpOnly: true });
     return { message: 'Login with Kakako Success!', ...user };
+  }
+
+  // naver //
+  @ApiOperation({
+    summary:
+      '네이버 로그인 요청 - naverAuthGuard로부터 로그인 리다이렉션 URL을 호출',
+  })
+  @UseGuards(NaverAuthGuard)
+  @Get('naver')
+  async NaverLogin(@Req() req: Request) {
+    return;
+  }
+
+  @ApiOperation({
+    summary: '네이버 로그인 리다이렉션',
+  })
+  @UseGuards(NaverAuthGuard)
+  @Get('naver/redirect')
+  async NaverLoginRedirect(
+    @User() user,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    res.cookie('accessToken', user.accessToken, { httpOnly: true });
+    res.cookie('refreshToken', user.refreshToken, { httpOnly: true });
+    return { message: 'Login with Naver Success!', ...user };
   }
 }
