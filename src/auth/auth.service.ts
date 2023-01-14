@@ -61,6 +61,12 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
+  async validateToken(token: string) {
+    return await this.jwtService.verifyAsync(token, {
+      secret: this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
+    });
+  }
+
   /** refreshToken 암호화하여 DB에 저장*/
   async updateRefreshToken(id: number, refreshToken: string) {
     const hashedRefreshToken = await hash(refreshToken, 10);
@@ -194,20 +200,32 @@ export class AuthService {
   }
 
   /** refreshToken */
-  async refreshTokens(userId: number, refreshToken: string) {
-    const user = await this.usersRepository.getById(userId);
-    if (!user || !user.refreshToken) {
-      throw new ForbiddenException(UsersErrorMessages.ACCESS_DENY);
-    }
+  async validateRefreshToken(userId: number, refreshToken: string) {
+    try {
+      const user = await this.usersRepository.getById(userId);
+      if (!user || !user.refreshToken) {
+        throw new ForbiddenException(UsersErrorMessages.NOT_FOUND_USER);
+      }
 
-    const refreshTokenMatches = await compare(refreshToken, user.refreshToken);
-    if (!refreshTokenMatches) {
-      throw new ForbiddenException(UsersErrorMessages.ACCESS_DENY);
-    }
+      // db에 저장된 리프래시토큰과 일치한지 확인
+      const refreshTokenMatches = await compare(
+        refreshToken,
+        user.refreshToken,
+      );
+      if (!refreshTokenMatches) {
+        throw new ForbiddenException(UsersErrorMessages.ACCESS_DENY);
+      }
 
-    const tokens = await this.getTokens(user.id, user.email);
-    await this.updateRefreshToken(user.id, tokens.refreshToken);
-    return tokens;
+      // 새로운 액세스토큰과 리프래시 토큰을 발급한다.
+      const tokens = await this.getTokens(user.id, user.email);
+
+      // 새로발급받은 리프래시 토큰을 다시 디비에 저장한다
+      await this.updateRefreshToken(user.id, tokens.refreshToken);
+      return tokens;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   /** 이메일 인증 */
