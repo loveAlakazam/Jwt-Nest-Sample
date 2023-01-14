@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback } from 'passport-google-oauth20';
 import { AuthService } from '../auth.service';
-import { UsersErrorMessages } from 'src/error/users/users-error-messages';
+import { UsersErrorMessages } from '../../error/users/users-error-messages';
 
 @Injectable()
 export class GoogleLoginStrategy extends PassportStrategy(Strategy, 'google') {

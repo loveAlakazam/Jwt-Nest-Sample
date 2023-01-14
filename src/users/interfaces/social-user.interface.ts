@@ -1,5 +1,3 @@
-import { IsOptional } from 'class-validator';
-
 export interface SocialUserDto {
   name: string;
   email: string;

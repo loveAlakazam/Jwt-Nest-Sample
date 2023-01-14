@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-local';
 import { AuthService } from '../auth.service';
-import { UsersErrorMessages } from 'src/error/users/users-error-messages';
+import { UsersErrorMessages } from '../../error/users/users-error-messages';
 import { ValidateLocalResponseDto } from '../dto/validate-local-response.dto';
 
 @Injectable()
