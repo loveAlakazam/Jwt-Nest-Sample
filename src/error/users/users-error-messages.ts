@@ -14,6 +14,12 @@ export const UsersErrorMessages = {
   ACCESS_GOOGLE_DENY: {
     message: '구글연동 접속을 실패',
   },
+  ACCESS_KAKAO_DENY: {
+    message: '카카오 연동 접속을 실패',
+  },
+  ACCESS_NAVER_DENY: {
+    message: '네이버 연동 접속을 실패',
+  },
   JOIN_FAIL: {
     message: '잘못된 요청으로 회원가입에 실패하였습니다.',
   },
