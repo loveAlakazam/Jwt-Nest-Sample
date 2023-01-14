@@ -1,26 +1,43 @@
-import { ExecutionContext, Injectable } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
+import {
+  ExecutionContext,
+  GoneException,
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+  UnauthorizedException,
+  UseFilters,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
-import { IS_PUBLIC_KEY } from '../../decorators/public.decorator';
-import * as jwt from '@nestjs/jwt';
+import { JwtService } from '@nestjs/jwt';
+import { UsersErrorMessages } from '../../error/users/users-error-messages';
+import { HttpExceptionFilter } from '../../error/http-exception.filter';
+import { AuthService } from '../auth.service';
 
+@UseFilters(HttpExceptionFilter)
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
-  constructor(private reflector: Reflector) {
+  constructor(private readonly authService: AuthService) {
     super();
   }
-  canActivate(context: ExecutionContext) {
-    /**
-     * 비회원상태에서 요청할 경우
-     */
-    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
-    if (isPublic) {
-      return true;
-    }
+  async canActivate(context: ExecutionContext) {
+    try {
+      // 헤더(쿠키)에 토큰이 존재하는지 확인.
+      const request = context.switchToHttp().getRequest();
+      const accessToken = request?.cookies?.accessToken;
+      console.log(accessToken);
+      if (!accessToken) {
+        throw new NotFoundException(UsersErrorMessages.NOT_FOUND_TOKEN);
+      }
+      // 액새스토큰이 검증이 가능한지 확인
+      const tokenValidate = await this.authService.validateToken(accessToken);
 
-    return super.canActivate(context);
+      request.user = tokenValidate.user ? tokenValidate.user : tokenValidate;
+      return true;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 }
