@@ -22,6 +22,10 @@ export class Users {
   @Column({ nullable: true, default: null })
   naverAccount: string;
 
+  // kakao
+  @Column({ nullable: true, default: null })
+  kakaoAccount: string;
+
   // refresh token
   @Column({
     type: 'text',
