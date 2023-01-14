@@ -9,7 +9,7 @@ export const UsersErrorMessages = {
     message: '이미 존재하는 유저입니다.',
   },
   ACCESS_DENY: {
-    message: '접속을 실패',
+    message: '접속과정에서 실패하였습니다.',
   },
   ACCESS_GOOGLE_DENY: {
     message: '구글연동 접속을 실패',
@@ -37,5 +37,8 @@ export const UsersErrorMessages = {
   },
   INTERNAL_SERVER_ERROR: {
     message: '서버내부에서 발생한 오류입니다.',
+  },
+  NOT_FOUND_TOKEN: {
+    message: '토큰이 존재하지 않습니다.',
   },
 };
