@@ -20,7 +20,7 @@ export class GoogleLoginStrategy extends PassportStrategy(Strategy, 'google') {
   }
 
   async validate(accessToken: string, refreshToken: string, profile: any) {
-    // accssToken: 구글서버로부터 인증 받은 access 토큰
+    // accessToken: 구글서버로부터 인증 받은 access 토큰
     // refreshToken: 구글서버로부터 인증 받은 refresh 토큰
     // profile: 현재 연동 로그인하려는 구글 계정 프로필정보
 
@@ -31,7 +31,7 @@ export class GoogleLoginStrategy extends PassportStrategy(Strategy, 'google') {
     const { id, emails, name } = profile;
 
     // 2. '액세스토큰' + '리프래시 토큰' + '연동로그인된 회원정보'  를 가져온다.
-    const user = await this.authService.validateGoogle({
+    const user = await this.authService.validateSocial({
       name: name.givenName,
       email: emails[0].value,
       googleAccount: id,
