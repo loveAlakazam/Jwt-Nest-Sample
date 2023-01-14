@@ -9,6 +9,8 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { GoogleLoginStrategy } from './strategies/google.strategy';
+import { KakaoLoginStrategy } from './strategies/kakao-strategy';
+import { NaverLoginStrategy } from './strategies/naver-strategy';
 
 @Module({
   imports: [
@@ -33,6 +35,8 @@ import { GoogleLoginStrategy } from './strategies/google.strategy';
     JwtStrategy,
     JwtRefreshStrategy,
     GoogleLoginStrategy,
+    KakaoLoginStrategy,
+    NaverLoginStrategy,
   ],
   exports: [AuthService, JwtModule],
 })

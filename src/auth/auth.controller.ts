@@ -21,6 +21,7 @@ import { CreateUserDto } from '../users/dto/create-user.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { HttpExceptionFilter } from '../error/http-exception.filter';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
+import { KakaoAuthGuard } from './guards/kakao-auth.guard';
 
 @ApiTags('Auth')
 @UseFilters(HttpExceptionFilter)
@@ -47,11 +48,7 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const { accessToken, refreshToken, ...userInfo } = user;
-
-    // accssToken을 담은 쿠키 생성
     res.cookie('accessToken', accessToken, { httpOnly: true });
-
-    // refreshToken을 담은 쿠키 생성
     res.cookie('refreshToken', refreshToken, { httpOnly: true });
 
     return {
@@ -77,6 +74,7 @@ export class AuthController {
     return res.status(200).json({ message: 'Logout Success' });
   }
 
+  // 구글 //
   @ApiOperation({
     summary: '구글 로그인 - googleAuthGuard로부터 로그인 리다이렉션 URL을 호출',
   })
@@ -96,12 +94,34 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    // 쿠키에 accssToken 저장
-    res.cookie('accssToken', user.accessToken, { httpOnly: true });
-
-    // 쿠키에 refreshToken 저장
+    res.cookie('accessToken', user.accessToken, { httpOnly: true });
     res.cookie('refreshToken', user.refreshToken, { httpOnly: true });
+    return { message: 'Login with Google Success!', ...user };
+  }
 
-    return { message: 'Login With Google Success!', ...user };
+  // kakao //
+  @ApiOperation({
+    summary:
+      '카카오 로그인 요청 - kakaoAuthGuard로부터 로그인 리다이렉션 URL을 호출',
+  })
+  @UseGuards(KakaoAuthGuard)
+  @Get('kakao')
+  async KakaoLogin(@Req() req: Request) {
+    return;
+  }
+
+  @ApiOperation({
+    summary: '카카오 로그인 리다이렉션',
+  })
+  @UseGuards(KakaoAuthGuard)
+  @Get('kakao/redirect')
+  async KakaoLoginRedirect(
+    @User() user,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    res.cookie('accessToken', user.accessToken, { httpOnly: true });
+    res.cookie('refreshToken', user.refreshToken, { httpOnly: true });
+    return { message: 'Login with Kakako Success!', ...user };
   }
 }
