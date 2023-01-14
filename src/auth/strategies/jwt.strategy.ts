@@ -13,7 +13,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     private readonly usersService: UsersService,
   ) {
     super({
-      // jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      ignoreExpiration: false, //토큰만료 무시
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request) => {
           const data = request?.cookies?.accessToken;
@@ -34,6 +34,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       throw new UnauthorizedException(UsersErrorMessages.ACCESS_DENY);
     }
 
+    // payload: 로그인유저 id(sub), email 정보조회가능.
     // payload.sub 에 해당하는 유저정보를 리스폰스한다.
     const userId = payload.sub;
 
