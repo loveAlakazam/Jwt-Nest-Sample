@@ -159,34 +159,34 @@ export class AuthService {
     return await this.usersRepository.update(userId, { refreshToken: null });
   }
 
-  /** 4. 구글로그인 */
-  async validateGoogle(socialUserDto: SocialUserDto) {
+  /** 4. 소셜 로그인 */
+  async validateSocial(socialUserDto: SocialUserDto) {
     try {
       // 임시로 가입을 해놓는다. -> 가입이후에 이메일/휴대폰 인증 api를 요청한다.
 
       // 1. 비밀번호를 제외한 회원정보를 가져온다.
-      let userFromGoogle = await this.usersRepository.getByEmail(
+      let userFromSocial = await this.usersRepository.getByEmail(
         socialUserDto.email,
       );
 
-      if (!userFromGoogle) {
+      if (!userFromSocial) {
         await this.registerFromSocial(socialUserDto);
-        userFromGoogle = await this.usersRepository.getByEmail(
+        userFromSocial = await this.usersRepository.getByEmail(
           socialUserDto.email,
         );
       }
 
       // 2. 토큰을 가져온다.
       const tokens = await this.getTokens(
-        userFromGoogle.id,
-        userFromGoogle.email,
+        userFromSocial.id,
+        userFromSocial.email,
       );
 
       // 3. 리프래시토큰을 데이터베이스에 저장한다.
-      await this.updateRefreshToken(userFromGoogle.id, tokens.refreshToken);
+      await this.updateRefreshToken(userFromSocial.id, tokens.refreshToken);
 
       // 4. 회원정보와 토큰정보를 모두 리턴한다.
-      return { ...userFromGoogle, ...tokens };
+      return { ...userFromSocial, ...tokens };
     } catch (error) {
       console.error(error);
       throw error;
