@@ -17,6 +17,9 @@ export const UsersErrorMessages = {
   ACCESS_KAKAO_DENY: {
     message: '카카오 연동 접속을 실패',
   },
+  ACCESS_KAKAO_DENY_NO_EMAIL: {
+    message: '이메일계정이 존재하지 않아 카카오 연동 로그인에 실패하였습니다.',
+  },
   ACCESS_NAVER_DENY: {
     message: '네이버 연동 접속을 실패',
   },
