@@ -14,12 +14,12 @@
   - [x] passport를 활용한 JWT 토큰 기반의 인증로직 구현하기
   - [x] Refresh 토큰인증 로직 구현하기
   - [x] 저장된 access/refresh 토큰을 쿠키에 저장하여 토큰인증하기
-  - [] 소셜로그인
-    - [] 구글
-    - [] 네이버
-    - [] 카카오
-    - [] 깃허브
+  - [x] 소셜로그인
+    - [x] 구글
+    - [x] 네이버
+    - [x] 카카오
   - [] nodemailer를 이용하여 메일인증하기
+  - [] SMS를 이용하여 문자인증하기
 
 
 <details>
@@ -44,10 +44,10 @@
 | /auth/register| 회원가입|✅|
 | /auth/login| 일반회원 로그인(local-strategy)| ✅|
 | /auth/logout| 일반회원 로그아웃<br>쿠키에 저장된 액세스 토큰과 리프래시 토큰을 만료시킨다. |✅|
-| /auth/google | 구글 OAuth 연동로그인 요청 | ✅|
-| /auth/naver | 네이버 OAuth 연동로그인 요청 ||
-| /auth/kakao | 카카오 OAuth 연동로그인 요청 ||
-| /auth/refresh | 액세스 토큰 갱신 | |
+| /auth/google | 구글 OAuth 연동로그인 요청 |✅|
+| /auth/naver | 네이버 OAuth 연동로그인 요청 |✅|
+| /auth/kakao | 카카오 OAuth 연동로그인 요청 |✅|
+| /auth/refresh | 액세스 토큰 갱신 |✅|
 
 
 ## 보완할점 
