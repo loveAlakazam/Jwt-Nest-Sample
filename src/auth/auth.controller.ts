@@ -159,6 +159,22 @@ export class AuthController {
     return { message: 'Login with Naver Success!', ...user };
   }
 
+  @ApiOperation({
+    summary: '토큰 갱신',
+  })
+  @UseGuards(JwtRefreshGuard)
+  @Get('auth/refresh')
+  async updateRefresh(
+    @User() user,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    // accessToken과 refreshToken을 갱신
+    res.cookie('accessToken', user.accessToken, { httpOnly: true });
+    res.cookie('refreshToken', user.refreshToken, { httpOnly: true });
+    return { message: 'Update Token Success', ...user };
+  }
+
   // 로그인한 회원정보 리턴
   // /my
   @ApiOperation({ summary: '로그인 유저정보 조회 API' })
