@@ -1,16 +1,14 @@
 import {
   ExecutionContext,
-  GoneException,
-  Inject,
   Injectable,
   InternalServerErrorException,
-  NotFoundException,
   UnauthorizedException,
   UseFilters,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { HttpExceptionFilter } from '../../error/http-exception.filter';
 import { AuthService } from '../auth.service';
+import { HttpExceptionFilter } from '../../error/http-exception.filter';
+import { UsersErrorMessages } from '../../error/users/users-error-messages';
 
 @UseFilters(HttpExceptionFilter)
 @Injectable()
@@ -35,7 +33,12 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       return true;
     } catch (error) {
       console.error(error);
-      throw error;
+      switch (error.message) {
+        case 'jwt expired':
+          throw new UnauthorizedException(UsersErrorMessages.EXPIRED_TOKEN);
+        default:
+          throw new InternalServerErrorException({ message: error.message });
+      }
     }
   }
 }
