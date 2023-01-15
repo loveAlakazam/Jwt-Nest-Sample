@@ -1,19 +1,13 @@
 import {
   BadRequestException,
-  ForbiddenException,
   Injectable,
   NotFoundException,
-  Req,
   UnauthorizedException,
   UseFilters,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { compare, hash } from 'bcrypt';
-import {
-  AlreadyExistUser,
-  FailedValidate,
-} from '../error/users/users-exception';
 import { UsersRepository } from '../users/users.repository';
 import { UsersErrorMessages } from '../error/users/users-error-messages';
 import { CreateUserDto } from '../users/dto/create-user.dto';
@@ -205,40 +199,33 @@ export class AuthService {
   }
 
   /** refreshToken 검증 */
-  async verifyRefreshToken(userId: number, refreshToken: string) {
+  async verifyRefreshToken(refreshToken: string) {
     try {
-      // refresh토큰 검증
-      const isValidatedRefreshToken = (await this.jwtService.verifyAsync(
+      const isValidatedRefreshToken = await this.jwtService.verifyAsync(
         refreshToken,
         { secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET') },
-      ))
-        ? true
-        : false;
-      if (isValidatedRefreshToken === false) {
-        throw new BadRequestException(UsersErrorMessages.INVALID_TOKEN);
-      }
+      );
 
-      // 접속한 유저 확인
+      return isValidatedRefreshToken;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
+
+  /** 데이터베이스에 저장된 refreshToken이 일치한지 확인하기 */
+  async checkRefreshTokenMatch(userId: number, refreshToken: string) {
+    try {
       const user = await this.usersRepository.getById(userId);
       if (!user) {
-        throw new ForbiddenException(UsersErrorMessages.NOT_FOUND_USER);
+        throw new NotFoundException(UsersErrorMessages.NOT_FOUND_USER);
       }
 
-      // db에 저장된 리프래시토큰과 일치한지 확인
-      const refreshTokenMatches = await compare(
-        refreshToken,
-        user.refreshToken,
-      );
-      if (!refreshTokenMatches) {
-        throw new ForbiddenException(UsersErrorMessages.ACCESS_DENY);
+      // 데이터베이스에 저장된 리프래시토큰과 일치한지 확인
+      const isMatch = await compare(refreshToken, user.refreshToken);
+      if (!isMatch) {
+        throw new BadRequestException(UsersErrorMessages.ACCESS_DENY);
       }
-
-      // 새로운 액세스토큰과 리프래시 토큰을 발급한다.
-      const tokens = await this.getTokens(user.id, user.email);
-
-      // 새로발급받은 리프래시 토큰을 다시 디비에 저장한다
-      await this.updateRefreshToken(user.id, tokens.refreshToken);
-      return tokens;
     } catch (error) {
       console.error(error);
       throw error;
@@ -248,157 +235,4 @@ export class AuthService {
   /** 이메일 인증 */
 
   /** SMS 인증 */
-
-  ///////////
-  // /**
-  //  * AccessToken을 발급
-  //  */
-  // async createAccessToken(user: any) {
-  //   const payload = {
-  //     type: 'accessToken',
-  //     id: user.id,
-  //     name: user.name,
-  //   };
-
-  //   const accessToken = this.jwtService.sign(payload, {
-  //     secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET'),
-  //     expiresIn: `${this.configService.get(
-  //       'JWT_ACCESS_TOKEN_EXPIRATION_TIME',
-  //     )}m`,
-  //   });
-
-  //   return accessToken;
-  // }
-
-  // getCookieWithJwtAccessToken(id: number) {
-  //   const payload = { id };
-  //   const token = this.jwtService.sign(payload, {
-  //     secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET'),
-  //     expiresIn: `${this.configService.get(
-  //       'JWT_ACCESS_TOKEN_EXPIRATION_TIME',
-  //     )}m`,
-  //   });
-
-  //   // accessToken 담은 쿠키 리턴
-  //   return {
-  //     accessToken: token,
-  //     domain: 'localhost',
-  //     path: '/',
-  //     httpOnly: true,
-  //     maxAge:
-  //       this.configService.get<number>('JWT_ACCESS_TOKEN_EXPIRATION_TIME') *
-  //       1000,
-  //   };
-  // }
-
-  // /**
-  //  * RefreshToken을 발급
-  //  */
-
-  // getCookieWithJwtRefreshToken(id: number) {
-  //   const payload = { id };
-  //   const token = this.jwtService.sign(payload, {
-  //     secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET'),
-  //     expiresIn: `${this.configService.get(
-  //       'JWT_REFRESH_TOKEN_EXPIRATION_TIME',
-  //     )}m`,
-  //   });
-
-  //   // refreshToken 저장된 쿠키 리턴
-  //   return {
-  //     refreshToken: token,
-  //     domain: 'localhost',
-  //     path: '/',
-  //     httpOnly: true,
-  //     maxAge:
-  //       this.configService.get<number>('JWT_REFRESH_TOKEN_EXPIRATION_TIME') *
-  //       1000,
-  //   };
-  // }
-
-  // async createRefreshToken(user: Users) {
-  //   const payload = {
-  //     type: 'refreshToken',
-  //     id: user.id,
-  //     name: user.name,
-  //   };
-
-  //   const token = this.jwtService.sign(payload, {
-  //     secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET'),
-  //     expiresIn: `${this.configService.get(
-  //       'JWT_REFRESH_TOKEN_EXPIRATION_TIME',
-  //     )}m`,
-  //   });
-
-  //   // 토큰검증
-  //   await this.tokenValidate(token);
-
-  //   // 갱신한 refreshToken을 암호화하여 DB에 저장
-  //   await this.setRefreshToken(token, user.id);
-  // }
-
-  // // 토큰검증
-  // async tokenValidate(token: string) {
-  //   return await this.jwtService.verify(token, {
-  //     secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET'),
-  //   });
-  // }
-
-  // /**
-  //  * 로그아웃할 때
-  //  * 현재 쿠키에 빈쿠키클르 기입하기 위한 값을 반환.
-  //  */
-  // getCookiesForLogOut() {
-  //   return {
-  //     accessTokenOption: {
-  //       domain: 'localhost',
-  //       path: '/',
-  //       httpOnly: true,
-  //       maxAge: 0,
-  //     },
-  //     refreshTokenOption: {
-  //       domain: 'localhost',
-  //       path: '/',
-  //       httpOnly: true,
-  //       maxAge: 0,
-  //     },
-  //   };
-  // }
-
-  // /**
-  //  * removeRefreshToken
-  //  * : 로그아웃할 때 사용. refreshToken 값을 null 로 한다.
-  //  */
-  // async removeRefreshToken(id: number) {
-  //   return this.usersRepository.updateUserRefreshToken(id, null);
-  // }
-
-  // 구글로그인
-  // async validateGoogle(googleId: string) {
-  //   try {
-  //     // 데이터베이스에 유저가 존재하는지 확인
-  //     const user = await this.usersRepository.getByGoogleId(googleId);
-
-  //     if (!user) {
-  //       return null;
-  //     }
-
-  //     return user;
-  //   } catch (error) {
-  //     return error;
-  //   }
-  // }
-
-  // // /** 임시토큰 발급 */
-  // async createOnceToken(socialType: string, socialId: string) {
-  //   const payload = {
-  //     type: socialType,
-  //     id: socialId,
-  //   };
-
-  //   return await this.jwtService.sign(payload, {
-  //     secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET'),
-  //     expiresIn: '15m',
-  //   });
-  // }
 }
