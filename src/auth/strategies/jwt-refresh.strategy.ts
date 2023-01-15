@@ -1,8 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
+import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { UsersService } from 'src/users/users.service';
+import { UsersErrorMessages } from '../../error/users/users-error-messages';
+import { AuthService } from '../auth.service';
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(
@@ -11,22 +17,19 @@ export class JwtRefreshStrategy extends PassportStrategy(
 ) {
   constructor(
     private readonly configService: ConfigService,
-    private readonly usersService: UsersService,
+    private readonly authService: AuthService,
   ) {
     super({
+      passReqToCallback: true,
+      secretOrKey: configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
       jwtFromRequest: ExtractJwt.fromExtractors([
-        (request) => {
-          return request?.cookies?.Refresh;
+        (request: Request) => {
+          const refreshToken = request?.cookies?.refreshToken;
+          if (!refreshToken) return null;
+
+          return refreshToken;
         },
       ]),
-      secretOrKey: configService.get('JWT_REFRESH_TOKEN_SECRET'),
-      passReqToCallback: true,
     });
-  }
-
-  async validate(req, payload: any) {
-    // RefreshToken이 유효한지 확인후에 유저정보를 반환.
-    const refreshToken = req.cookies?.Refresh;
-    return this.usersService.checkVerifyRefreshToken(refreshToken, payload.id);
   }
 }

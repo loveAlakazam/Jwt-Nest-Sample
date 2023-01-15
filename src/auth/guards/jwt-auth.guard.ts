@@ -1,24 +1,44 @@
-import { ExecutionContext, Injectable } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
+import {
+  ExecutionContext,
+  Injectable,
+  InternalServerErrorException,
+  UnauthorizedException,
+  UseFilters,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { IS_PUBLIC_KEY } from '../../decorators/public.decorator';
+import { AuthService } from '../auth.service';
+import { HttpExceptionFilter } from '../../error/http-exception.filter';
+import { UsersErrorMessages } from '../../error/users/users-error-messages';
 
+@UseFilters(HttpExceptionFilter)
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
-  constructor(private reflector: Reflector) {
+  constructor(private readonly authService: AuthService) {
     super();
   }
 
-  canActivate(context: ExecutionContext) {
-    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
+  async canActivate(context: ExecutionContext) {
+    try {
+      // 토큰이 존재하는지 확인
+      const request = context.switchToHttp().getRequest();
+      const accessToken = request?.cookies?.accessToken;
+      if (!accessToken) return false;
 
-    if (isPublic) {
+      // 토큰 검증
+      const validateToken = await this.authService.verifyAccessToken(
+        accessToken,
+      );
+
+      request.user = validateToken.user ? validateToken.user : validateToken;
       return true;
+    } catch (error) {
+      console.error(error);
+      switch (error.message) {
+        case 'jwt expired':
+          throw new UnauthorizedException(UsersErrorMessages.EXPIRED_TOKEN);
+        default:
+          throw new InternalServerErrorException({ message: error.message });
+      }
     }
-
-    return super.canActivate(context);
   }
 }

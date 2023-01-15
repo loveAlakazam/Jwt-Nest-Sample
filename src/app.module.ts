@@ -1,8 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { APP_FILTER, APP_GUARD } from '@nestjs/core';
+import { APP_FILTER } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MysqlConfigModule } from './mysql/mysql.config.module';
 import { AuthModule } from './auth/auth.module';
@@ -10,8 +9,6 @@ import { UsersModule } from './users/users.module';
 import { MysqlConfigService } from './mysql/mysql.config.service';
 import { HttpExceptionFilter } from './error/http-exception.filter';
 import * as Joi from 'joi';
-import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
-import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -28,13 +25,10 @@ import { JwtModule } from '@nestjs/jwt';
         MYSQL_PASSWORD: Joi.string().required(),
         MYSQL_DATABASE: Joi.string().required(),
         /* JWT */
-        JWT_SECRET_KEY: Joi.string().required(),
-        JWT_EXPIRATION_TIME: Joi.number().required(),
-        IS_PUBLIC_KEY: Joi.string().required(),
         JWT_ACCESS_TOKEN_SECRET: Joi.string().required(),
-        JWT_ACCESS_TOKEN_EXPIRATION_TIME: Joi.number().required(),
+        JWT_ACCESS_EXPIRATION_TIME: Joi.string().required(),
         JWT_REFRESH_TOKEN_SECRET: Joi.string().required(),
-        JWT_REFRESH_TOKEN_EXPIRATION_TIME: Joi.number().required(),
+        JWT_REFRESH_EXPIRATION_TIME: Joi.string().required(),
       }),
     }),
     TypeOrmModule.forRootAsync({
@@ -44,11 +38,10 @@ import { JwtModule } from '@nestjs/jwt';
     AuthModule,
     UsersModule,
   ],
-  controllers: [AppController],
+  controllers: [],
   providers: [
     AppService,
     { provide: APP_FILTER, useClass: HttpExceptionFilter },
-    { provide: APP_GUARD, useClass: JwtAuthGuard },
   ],
 })
 export class AppModule {}
