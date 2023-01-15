@@ -12,10 +12,7 @@ import { UsersRepository } from '../../users/users.repository';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
-  constructor(
-    private readonly configService: ConfigService,
-    private readonly usersRepository: UsersRepository,
-  ) {
+  constructor(private readonly configService: ConfigService) {
     super({
       ignoreExpiration: false, //토큰만료 무시
       jwtFromRequest: ExtractJwt.fromExtractors([
