@@ -19,7 +19,12 @@ export class GoogleLoginStrategy extends PassportStrategy(Strategy, 'google') {
     });
   }
 
-  async validate(accessToken: string, refreshToken: string, profile: any) {
+  async validate(
+    accessToken: string,
+    refreshToken: string,
+    profile: any,
+    done: VerifyCallback,
+  ) {
     // accessToken: 구글서버로부터 인증 받은 access 토큰
     // refreshToken: 구글서버로부터 인증 받은 refresh 토큰
     // profile: 현재 연동 로그인하려는 구글 계정 프로필정보
