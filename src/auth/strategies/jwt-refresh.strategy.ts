@@ -32,24 +32,4 @@ export class JwtRefreshStrategy extends PassportStrategy(
       ]),
     });
   }
-
-  async validate(req: Request, payload: any) {
-    // 토큰갱신할 때
-    // refreshToken이 쿠키에 존재하는지 확인
-    const refreshToken = req.cookies?.refreshToken;
-    if (!refreshToken) {
-      throw new UnauthorizedException(UsersErrorMessages.NOT_FOUND_TOKEN);
-    }
-
-    // 요청유저가 존재하는지 확인
-    if (!payload) {
-      throw new NotFoundException(UsersErrorMessages.NOT_FOUND_USER);
-    }
-
-    // 새로발급받은 access토큰, refresh 토큰을 리턴한다.
-    return await this.authService.validateRefreshToken(
-      payload.sub,
-      refreshToken,
-    );
-  }
 }
