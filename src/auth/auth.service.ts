@@ -8,7 +8,6 @@ import {
   UseFilters,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { compare, hash } from 'bcrypt';
 import {
@@ -28,11 +27,11 @@ import { ValidateLocalResponseDto } from './dto/validate-local-response.dto';
 export class AuthService {
   constructor(
     private readonly usersRepository: UsersRepository,
-    private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {}
 
+  /** 토큰 생성 */
   async getTokens(userId: number, email: string) {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(
@@ -61,12 +60,6 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
-  async validateToken(token: string) {
-    return await this.jwtService.verifyAsync(token, {
-      secret: this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
-    });
-  }
-
   /** refreshToken 암호화하여 DB에 저장*/
   async updateRefreshToken(id: number, refreshToken: string) {
     const hashedRefreshToken = await hash(refreshToken, 10);
@@ -79,7 +72,7 @@ export class AuthService {
   async register(createUserDto: CreateUserDto) {
     try {
       // 회원 존재 확인
-      const userExists = await this.usersService.findUserByEmail(
+      const userExists = await this.usersRepository.getByEmail(
         createUserDto.email,
       );
 
@@ -89,7 +82,7 @@ export class AuthService {
 
       // 비밀번호 암호화
       const hashedPassword = await hash(createUserDto.password, 10);
-      const newUser = await this.usersService.create({
+      const newUser = await this.usersRepository.create({
         ...createUserDto,
         password: hashedPassword,
       });
@@ -199,11 +192,35 @@ export class AuthService {
     }
   }
 
-  /** refreshToken */
-  async validateRefreshToken(userId: number, refreshToken: string) {
+  /** 토큰 검증 */
+  async verifyAccessToken(token: string) {
     try {
+      return await this.jwtService.verifyAsync(token, {
+        secret: this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
+      });
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
+
+  /** refreshToken 검증 */
+  async verifyRefreshToken(userId: number, refreshToken: string) {
+    try {
+      // refresh토큰 검증
+      const isValidatedRefreshToken = (await this.jwtService.verifyAsync(
+        refreshToken,
+        { secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET') },
+      ))
+        ? true
+        : false;
+      if (isValidatedRefreshToken === false) {
+        throw new BadRequestException(UsersErrorMessages.INVALID_TOKEN);
+      }
+
+      // 접속한 유저 확인
       const user = await this.usersRepository.getById(userId);
-      if (!user || !user.refreshToken) {
+      if (!user) {
         throw new ForbiddenException(UsersErrorMessages.NOT_FOUND_USER);
       }
 
