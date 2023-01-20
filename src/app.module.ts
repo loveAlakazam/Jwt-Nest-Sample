@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { MysqlConfigService } from './mysql/mysql.config.service';
 import { HttpExceptionFilter } from './error/http-exception.filter';
+import { EmailModule } from './email/email.module';
 import * as Joi from 'joi';
 
 @Module({
@@ -37,6 +38,7 @@ import * as Joi from 'joi';
     }),
     AuthModule,
     UsersModule,
+    EmailModule,
   ],
   controllers: [],
   providers: [
