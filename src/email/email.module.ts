@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+
 import { EmailController } from './email.controller';
 import { EmailService } from './email.service';
 
@@ -13,7 +15,7 @@ import { EmailService } from './email.service';
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         transport: {
-          host: 'smtp.example.com',
+          host: 'smtp.gmail.com',
           port: 587, // Single Connection
           secure: false, // Use TLS
           auth: {
@@ -24,10 +26,10 @@ import { EmailService } from './email.service';
         defaults: {
           from: '"No-Reply" <no-reply@localhost>',
         },
-        preview: true,
+        preview: false, // true로 하면 메일 전송을 요청할때마다 보낸 내용을 브라우저에서 확인할 수 있다.
         template: {
           dir: __dirname + '/templates',
-          adapter: new HandlebarsAdapter(),
+          adapter: new HandlebarsAdapter(), // Handlebars 이메일 내용 포맷을 담당하는 객체를 넣는다.
           options: {
             strict: true,
           },
