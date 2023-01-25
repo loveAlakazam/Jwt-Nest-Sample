@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { CacheModule, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -39,6 +39,7 @@ import * as Joi from 'joi';
     AuthModule,
     UsersModule,
     EmailModule,
+    CacheModule.register(),
   ],
   controllers: [],
   providers: [
