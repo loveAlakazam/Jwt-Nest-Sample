@@ -14,11 +14,11 @@ export class EmailService {
   async sendHello(): Promise<boolean> {
     await this.mailerService
       .sendMail({
-        to: 'dmsrkd1216@gmail.com',
+        to: 'ekk12mv2@gmail.com',
         from: 'noreply@gmail.com',
-        subject: 'Hello',
-        text: 'hello World',
-        html: `<b>Hello World</b>`,
+        subject: 'Hello test',
+        text: 'hello World!!!',
+        html: `<b>hello~~~</b>`,
       })
       .then((result) => {
         console.log(result);
