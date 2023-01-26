@@ -124,12 +124,17 @@ export class AuthService {
         throw new BadRequestException(UsersErrorMessages.NOT_FOUND_USER);
       }
 
+      // 입력한 비밀번호와 일치한지 검증
       await this.verifyPassword(data.password, user.password);
 
       const tokens = await this.getTokens(user.id, user.email);
 
+      // refreshToen을 저장한다
       await this.updateRefreshToken(user.id, tokens.refreshToken);
-      return { ...user, ...tokens };
+
+      const { password, refreshToken, ...userInfoWithoutSecrets } = user;
+      const accessToken = tokens.accessToken;
+      return { ...userInfoWithoutSecrets, accessToken };
     } catch (error) {
       console.error(error);
       throw error;
@@ -153,12 +158,14 @@ export class AuthService {
   }
 
   /** 4. 소셜 로그인 */
-  async validateSocial(socialUserDto: SocialUserDto) {
+  async validateSocial(
+    socialUserDto: SocialUserDto,
+  ): Promise<ValidateLocalResponseDto> {
     try {
       // 임시로 가입을 해놓는다. -> 가입이후에 이메일/휴대폰 인증 api를 요청한다.
 
       // 1. 비밀번호를 제외한 회원정보를 가져온다.
-      let userFromSocial = await this.usersRepository.getByEmail(
+      let userFromSocial = await this.usersRepository.getWithoutSecretsByEmail(
         socialUserDto.email,
       );
 
@@ -179,7 +186,8 @@ export class AuthService {
       await this.updateRefreshToken(userFromSocial.id, tokens.refreshToken);
 
       // 4. 회원정보와 토큰정보를 모두 리턴한다.
-      return { ...userFromSocial, ...tokens };
+      const accessToken = tokens.accessToken;
+      return { ...userFromSocial, accessToken };
     } catch (error) {
       console.error(error);
       throw error;

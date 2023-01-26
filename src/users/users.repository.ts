@@ -25,6 +25,12 @@ export class UsersRepository {
     return user;
   }
 
+  async getWithoutSecretsByEmail(email: string) {
+    const { password, refreshToken, ...user } =
+      await this.usersRepository.findOneBy({ email: email });
+    return user;
+  }
+
   async getById(id: number) {
     const user = await this.usersRepository.findOneBy({ id: id });
     return user;
