@@ -8,7 +8,25 @@ import helmet from 'helmet';
 import * as csurf from 'csurf';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { cors: true });
+  // cors(cross-origin-resource-sharing) 적용
+  // 다른도메인에서 리소스 요청을 허용하게끔 한다.
+
+  const app = await NestFactory.create(AppModule, {
+    cors: {
+      origin: '*',
+      methods: ['GET,HEAD,OPTIONS,POST,PUT,DELETE,PATCH'],
+      allowedHeaders: [
+        'Content-Type',
+        'X-CSRF-TOKEN',
+        'access-control-allow-methods',
+        'Access-Control-Allow-Origin',
+        'access-control-allow-credentials',
+        'access-control-allow-headers',
+      ],
+      credentials: true,
+    },
+    bodyParser: true,
+  });
 
   // swagger 적용
   /**
@@ -37,7 +55,7 @@ async function bootstrap() {
   });
 
   // global pipes
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 
   // HttpExceptionFilter 적용
   app.useGlobalFilters(new HttpExceptionFilter());
@@ -46,7 +64,15 @@ async function bootstrap() {
   app.use(cookieParser());
 
   // csrf
-  app.use(csurf());
+  // 쿠키에 csrf Secret을 저장.
+  // csrf 토큰없이 post/put/delete 요청에 대한 응답을 거부
+  app.use(['/user/', '/auth/csrf'], csurf({ cookie: { sameSite: true } }));
+  // app.use((req: any, res: any, next: any) => {
+  //   const token = req.csrfToken();
+  //   res.cookie('XSRF-TOKEN', token);
+  //   res.locals.csrfToken = token;
+  //   next();
+  // });
 
   // helmet 적용
   app.use(helmet());
