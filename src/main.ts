@@ -67,12 +67,6 @@ async function bootstrap() {
   // 쿠키에 csrf Secret을 저장.
   // csrf 토큰없이 post/put/delete 요청에 대한 응답을 거부
   app.use(['/user/', '/auth/csrf'], csurf({ cookie: { sameSite: true } }));
-  // app.use((req: any, res: any, next: any) => {
-  //   const token = req.csrfToken();
-  //   res.cookie('XSRF-TOKEN', token);
-  //   res.locals.csrfToken = token;
-  //   next();
-  // });
 
   // helmet 적용
   app.use(helmet());
