@@ -80,6 +80,9 @@ export class AuthController {
     res.cookie('accessToken', '', { maxAge: 0 });
     res.cookie('refreshToken', '', { maxAge: 0 });
 
+    res.clearCookie('accessToken');
+    res.clearCookie('refreshToken');
+
     return res.status(200).json({ message: 'Logout Success' });
   }
 
@@ -181,21 +184,35 @@ export class AuthController {
   // /my
   @ApiOperation({ summary: '로그인 유저정보 조회 API' })
   @UseGuards(JwtAuthGuard)
-  @Get('my')
-  async getProfile(@User() user) {
+  @Get('user/my')
+  async getProfile(@User() user, @Req() req) {
     return user;
   }
 
   @UseGuards(JwtAuthGuard)
   @Patch('user/:id')
-  async updateUserInfo() {
-    return 'protected';
+  async updateUserInfo(@Req() req) {
+    return { message: 'protected' };
   }
 
   // 회원별 회원정보 리턴
   @ApiOperation({ summary: '로그인 유저 아이디 조회 API' })
-  @Get(':id')
-  async findUserById(@Param('id', ParseIntPipe) id: number, @User() user) {
+  @UseGuards(JwtAuthGuard)
+  @Get('user/:id')
+  async findUserById(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req,
+    @User() user,
+  ) {
     return this.usersService.findUserById(id);
+  }
+
+  // csrf token을 얻는다.
+  @ApiOperation({ summary: 'csrf 토큰 생성 API' })
+  @UseGuards(JwtAuthGuard)
+  @Get('auth/csrf')
+  async getCsrfToken(@Req() req, @Res() res: Response) {
+    res.cookie('XSRF-TOKEN', req.csrfToken(), { httpOnly: true });
+    return res.json({});
   }
 }
