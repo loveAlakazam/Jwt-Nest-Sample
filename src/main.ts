@@ -4,6 +4,8 @@ import { HttpExceptionFilter } from './error/http-exception.filter';
 import * as cookieParser from 'cookie-parser';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { nestCsrf } from 'ncsrf';
+import helmet from 'helmet';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
@@ -42,6 +44,12 @@ async function bootstrap() {
 
   // 쿠키적용
   app.use(cookieParser());
+
+  // csrf 방지
+  app.use(nestCsrf());
+
+  // helmet 적용
+  app.use(helmet());
 
   await app.listen(process.env.SERVER_PORT);
 }
