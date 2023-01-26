@@ -35,4 +35,5 @@ jobs:
       - name: npm install, and build
         run: |
           npm install
+          npm install --force
           npm run build
