@@ -11,6 +11,7 @@ import {
   UseFilters,
   Param,
   ParseIntPipe,
+  Patch,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
@@ -104,6 +105,7 @@ export class AuthController {
   ) {
     res.cookie('accessToken', user.accessToken, { httpOnly: true });
     res.cookie('refreshToken', user.refreshToken, { httpOnly: true });
+
     return { message: 'Login with Google Success!', ...user };
   }
 
@@ -184,10 +186,15 @@ export class AuthController {
     return user;
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Patch('user/:id')
+  async updateUserInfo() {
+    return 'protected';
+  }
+
   // 회원별 회원정보 리턴
-  @ApiOperation({ summary: '회원정보 리턴' })
-  @Get(':id')
   @ApiOperation({ summary: '로그인 유저 아이디 조회 API' })
+  @Get(':id')
   async findUserById(@Param('id', ParseIntPipe) id: number, @User() user) {
     return this.usersService.findUserById(id);
   }
