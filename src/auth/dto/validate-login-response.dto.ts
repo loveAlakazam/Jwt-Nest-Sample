@@ -1,6 +1,5 @@
-export class ValidateLocalResponseDto {
+export class ValidateLoginResponseDto {
   accessToken: string;
-  refreshToken: string;
   id: number;
   name: string;
   email: string;
