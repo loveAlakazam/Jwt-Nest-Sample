@@ -14,7 +14,7 @@ import { CreateUserDto } from '../users/dto/create-user.dto';
 import { AuthDto } from './dto/auth.dto';
 import { SocialUserDto } from '../users/interfaces/social-user.interface';
 import { HttpExceptionFilter } from '../error/http-exception.filter';
-import { ValidateLocalResponseDto } from './dto/validate-local-response.dto';
+import { ValidateLoginResponseDto } from './dto/validate-login-response.dto';
 
 @UseFilters(new HttpExceptionFilter())
 @Injectable()
@@ -117,7 +117,7 @@ export class AuthService {
   }
 
   /** 2. 로그인 */
-  async validateLocal(data: AuthDto): Promise<ValidateLocalResponseDto> {
+  async validateLocal(data: AuthDto): Promise<ValidateLoginResponseDto> {
     try {
       const user = await this.usersRepository.getByEmail(data.email);
       if (!user) {
@@ -160,7 +160,7 @@ export class AuthService {
   /** 4. 소셜 로그인 */
   async validateSocial(
     socialUserDto: SocialUserDto,
-  ): Promise<ValidateLocalResponseDto> {
+  ): Promise<ValidateLoginResponseDto> {
     try {
       // 임시로 가입을 해놓는다. -> 가입이후에 이메일/휴대폰 인증 api를 요청한다.
 
