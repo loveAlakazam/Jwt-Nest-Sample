@@ -5,6 +5,7 @@ import * as cookieParser from 'cookie-parser';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
+import * as csurf from 'csurf';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
@@ -43,6 +44,9 @@ async function bootstrap() {
 
   // 쿠키적용
   app.use(cookieParser());
+
+  // csrf
+  app.use(csurf());
 
   // helmet 적용
   app.use(helmet());
