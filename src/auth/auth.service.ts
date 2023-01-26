@@ -133,8 +133,7 @@ export class AuthService {
       await this.updateRefreshToken(user.id, tokens.refreshToken);
 
       const { password, refreshToken, ...userInfoWithoutSecrets } = user;
-      const accessToken = tokens.accessToken;
-      return { ...userInfoWithoutSecrets, accessToken };
+      return { ...userInfoWithoutSecrets, ...tokens };
     } catch (error) {
       console.error(error);
       throw error;
@@ -186,8 +185,7 @@ export class AuthService {
       await this.updateRefreshToken(userFromSocial.id, tokens.refreshToken);
 
       // 4. 회원정보와 토큰정보를 모두 리턴한다.
-      const accessToken = tokens.accessToken;
-      return { ...userFromSocial, accessToken };
+      return { ...userFromSocial, ...tokens };
     } catch (error) {
       console.error(error);
       throw error;
