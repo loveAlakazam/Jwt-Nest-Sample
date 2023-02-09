@@ -15,7 +15,6 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
-import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
@@ -28,6 +27,7 @@ import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { KakaoAuthGuard } from './guards/kakao-auth.guard';
 import { NaverAuthGuard } from './guards/naver-auth.guard';
 import { UsersService } from '../users/users.service';
+// import { EmailService } from '../email/email.service';
 
 @ApiTags('Auth')
 @UseFilters(HttpExceptionFilter)
@@ -36,19 +36,20 @@ export class AuthController {
   constructor(
     private readonly configService: ConfigService,
     private readonly authService: AuthService,
-    private readonly usersService: UsersService,
-    private readonly eventEmitter: EventEmitter2,
+    private readonly usersService: UsersService, // private readonly emailService: EmailService,
   ) {}
 
   @ApiOperation({ summary: '회원가입 API' })
+  @HttpCode(201)
   @Post('auth/register')
-  async register(@Body() data: CreateUserDto) {
-    return await this.authService.register(data);
+  async register(@Req() req: Request, @Res() res: Response) {
+    await this.authService.register({ ...req.body });
+    return res.status(201).json({ message: '로그인 성공' });
   }
 
-  @HttpCode(200)
   @ApiOperation({ summary: '로그인 API' })
   @UseGuards(LocalAuthGuard) // 로그인할때 입력정보가 올바른지 검증하는 가드
+  @HttpCode(201)
   @Post('auth/login')
   async signIn(
     @User() user,
@@ -82,8 +83,13 @@ export class AuthController {
     res.cookie('accessToken', '', { maxAge: 0 });
     res.cookie('refreshToken', '', { maxAge: 0 });
 
+    // 3. CSRF토큰을 제거한다.
+    res.cookie('XSRF-TOKEN', '', { maxAge: 0 });
+
     res.clearCookie('accessToken');
     res.clearCookie('refreshToken');
+    res.clearCookie('XSRF-TOKEN');
+    res.clearCookie('_csrf');
 
     return res.status(200).json({ message: 'Logout Success' });
   }
