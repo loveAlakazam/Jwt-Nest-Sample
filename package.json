@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-ses": "^3.267.0",
+    "@aws-sdk/credential-provider-node": "^3.267.0",
     "@hapi/joi": "^17.1.1",
     "@nestjs-modules/mailer": "^1.8.1",
     "@nestjs/apollo": "^10.1.6",
