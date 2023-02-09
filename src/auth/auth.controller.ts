@@ -20,14 +20,12 @@ import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
 import { User } from '../decorators/user.decorator';
-import { CreateUserDto } from '../users/dto/create-user.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { HttpExceptionFilter } from '../error/http-exception.filter';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { KakaoAuthGuard } from './guards/kakao-auth.guard';
 import { NaverAuthGuard } from './guards/naver-auth.guard';
 import { UsersService } from '../users/users.service';
-// import { EmailService } from '../email/email.service';
 
 @ApiTags('Auth')
 @UseFilters(HttpExceptionFilter)
@@ -43,7 +41,10 @@ export class AuthController {
   @HttpCode(201)
   @Post('auth/register')
   async register(@Req() req: Request, @Res() res: Response) {
-    await this.authService.register({ ...req.body });
+    const tokens = await this.authService.register({ ...req.body });
+    res.cookie('accessToken', tokens.accessToken, { httpOnly: true });
+    res.cookie('refreshToken', tokens.refreshToken, { httpOnly: true });
+
     return res.status(201).json({ message: '로그인 성공' });
   }
 
@@ -57,6 +58,7 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const { accessToken, refreshToken, ...userInfo } = user;
+    // 쿠키 생성
     res.cookie('accessToken', accessToken, { httpOnly: true });
     res.cookie('refreshToken', refreshToken, { httpOnly: true });
 
@@ -73,21 +75,14 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Get('auth/logout')
   async signOut(@User() user, @Req() req: Request, @Res() res: Response) {
-    console.log(user);
-    console.log(req.user);
-    console.log(req.cookies);
     // 1. refreshToken값을 null 로 변경한다.
     await this.authService.signOut(user.id);
 
     // 2. 로컬존재하는 쿠키의 유효시간을 만료시킨다.
-    res.cookie('accessToken', '', { maxAge: 0 });
-    res.cookie('refreshToken', '', { maxAge: 0 });
-
-    // 3. CSRF토큰을 제거한다.
-    res.cookie('XSRF-TOKEN', '', { maxAge: 0 });
-
     res.clearCookie('accessToken');
     res.clearCookie('refreshToken');
+
+    // 3. CSRF토큰을 제거한다.
     res.clearCookie('XSRF-TOKEN');
     res.clearCookie('_csrf');
 
@@ -114,6 +109,7 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
+    // 쿠키 생성
     res.cookie('accessToken', user.accessToken, { httpOnly: true });
     res.cookie('refreshToken', user.refreshToken, { httpOnly: true });
 
@@ -143,6 +139,7 @@ export class AuthController {
   ) {
     res.cookie('accessToken', user.accessToken, { httpOnly: true });
     res.cookie('refreshToken', user.refreshToken, { httpOnly: true });
+
     return { message: 'Login with Kakako Success!', ...user };
   }
 
@@ -169,6 +166,7 @@ export class AuthController {
   ) {
     res.cookie('accessToken', user.accessToken, { httpOnly: true });
     res.cookie('refreshToken', user.refreshToken, { httpOnly: true });
+
     return { message: 'Login with Naver Success!', ...user };
   }
 
@@ -185,6 +183,7 @@ export class AuthController {
     // accessToken과 refreshToken을 갱신
     res.cookie('accessToken', user.accessToken, { httpOnly: true });
     res.cookie('refreshToken', user.refreshToken, { httpOnly: true });
+
     return { message: 'Update Token Success', ...user };
   }
 
@@ -216,11 +215,20 @@ export class AuthController {
   }
 
   // csrf token을 얻는다.
+  // 모든 요청에 csrf토큰을 저장한다. (1시간 유효)
+  /**
+   * 1. 로그인/회원가입 이후에 클라이언트로부터 서버에게 csrf토큰 요청 API를 전송해야한다.
+   * 2. 이후에 데이터 변경이 필요한 method이자, csrf토큰이 요구되는 api를 요청할때는
+   * 쿠키에 저장된 csrf토큰과 같이 요청한다.
+   **/
   @ApiOperation({ summary: 'csrf 토큰 생성 API' })
   @UseGuards(JwtAuthGuard)
-  @Get('auth/csrf')
+  @Get('/auth/csrf')
   async getCsrfToken(@Req() req, @Res() res: Response) {
-    res.cookie('XSRF-TOKEN', req.csrfToken(), { httpOnly: true });
+    res.cookie('XSRF-TOKEN', req.csrfToken(), {
+      httpOnly: true,
+      expires: new Date(Date.now() + 1 * 60 * 60 * 1000),
+    });
     return res.json({});
   }
 }
