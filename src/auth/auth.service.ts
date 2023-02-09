@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { compare, hash } from 'bcrypt';
 import { UsersRepository } from '../users/users.repository';
 import { UsersErrorMessages } from '../error/users/users-error-messages';
@@ -15,6 +16,7 @@ import { AuthDto } from './dto/auth.dto';
 import { SocialUserDto } from '../users/interfaces/social-user.interface';
 import { HttpExceptionFilter } from '../error/http-exception.filter';
 import { ValidateLoginResponseDto } from './dto/validate-login-response.dto';
+import { EmailService } from '../email/email.service';
 
 @UseFilters(new HttpExceptionFilter())
 @Injectable()
@@ -23,6 +25,8 @@ export class AuthService {
     private readonly usersRepository: UsersRepository,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly eventEmitter: EventEmitter2,
+    private readonly emailService: EmailService,
   ) {}
 
   /** 토큰 생성 */
@@ -84,6 +88,8 @@ export class AuthService {
       // 토큰발급
       const tokens = await this.getTokens(newUser.id, newUser.email);
       await this.updateRefreshToken(newUser.id, tokens.refreshToken);
+
+      // 이벤트 호출: 회원가입 환영 이메일
 
       return tokens;
     } catch (error) {
