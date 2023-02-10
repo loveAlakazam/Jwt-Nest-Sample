@@ -1,15 +1,15 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
-
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { EmailController } from './email.controller';
 import { EmailService } from './email.service';
 
 @Module({
   imports: [
     ConfigModule,
+    /** 일반 Gmail 계정으로 이메일을 전송할 때 */
     MailerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -36,6 +36,7 @@ import { EmailService } from './email.service';
         },
       }),
     }),
+    EventEmitterModule.forRoot(),
   ],
   controllers: [EmailController],
   providers: [EmailService],
