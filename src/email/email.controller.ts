@@ -1,8 +1,10 @@
-import { Controller, Get, Post } from '@nestjs/common';
+import { Request, Response } from 'express';
+import { Controller, Get, HttpCode, Post, Req, Res } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EmailService } from './email.service';
-import { ApiOperation } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('email')
 @Controller('email')
 export class EmailController {
   constructor(
@@ -13,9 +15,21 @@ export class EmailController {
   @ApiOperation({
     summary: '메일전송 테스트',
   })
-  @Get('test')
-  async testEmail() {
-    return await this.emailService.sendHello();
+  @HttpCode(201)
+  @Post('test')
+  async testEmail(@Req() req: Request, @Res() res: Response) {
+    // await this.emailService.sendMailByNodemailer({
+    //   title: '테스트 이메일 제목',
+    //   content: '이메일전송',
+    //   ...req.body,
+    // });
+
+    await this.emailService.sendMailBySES({
+      subject: 'aws 테스트 이메일 전송',
+      mailBody: '이메일 전송완료했습니다.',
+      ...req.body,
+    });
+    return res.status(201).json({ message: '이메일 전송 완료' });
   }
 
   @ApiOperation({
@@ -23,6 +37,14 @@ export class EmailController {
   })
   @Post('auth')
   async authenticateByEmail() {
+    return;
+  }
+
+  @ApiOperation({
+    summary: '이메일 비밀번호 변경',
+  })
+  @Post('password')
+  async updatePasswordByEmail() {
     return;
   }
 }
