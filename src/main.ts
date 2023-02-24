@@ -12,20 +12,9 @@ async function bootstrap() {
   // 다른도메인에서 리소스 요청을 허용하게끔 한다.
 
   const app = await NestFactory.create(AppModule, {
-    cors: {
-      origin: '*',
-      methods: ['GET,HEAD,OPTIONS,POST,PUT,DELETE,PATCH'],
-      allowedHeaders: [
-        'Content-Type',
-        'X-CSRF-TOKEN',
-        'access-control-allow-methods',
-        'Access-Control-Allow-Origin',
-        'access-control-allow-credentials',
-        'access-control-allow-headers',
-      ],
-      credentials: true,
-    },
+    cors: true,
     bodyParser: true,
+    rawBody: false,
   });
 
   // swagger 적용
@@ -54,12 +43,6 @@ async function bootstrap() {
     swaggerOptions: { defaultModelsExpandDepth: -1 },
   });
 
-  // global pipes
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
-
-  // HttpExceptionFilter 적용
-  app.useGlobalFilters(new HttpExceptionFilter());
-
   // 쿠키적용
   app.use(cookieParser());
 
@@ -70,6 +53,12 @@ async function bootstrap() {
 
   // helmet 적용
   app.use(helmet());
+
+  // global pipes
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+
+  // HttpExceptionFilter 적용
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   await app.listen(process.env.SERVER_PORT);
 }

@@ -1,16 +1,18 @@
 import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { LocalStrategy } from './strategies/local.strategy';
 import { UsersModule } from '../users/users.module';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { GoogleLoginStrategy } from './strategies/google.strategy';
 import { KakaoLoginStrategy } from './strategies/kakao-strategy';
 import { NaverLoginStrategy } from './strategies/naver-strategy';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { EmailModule } from '../email/email.module';
 
 @Module({
   imports: [
@@ -27,6 +29,8 @@ import { NaverLoginStrategy } from './strategies/naver-strategy';
         },
       }),
     }),
+    EventEmitterModule.forRoot(),
+    EmailModule,
   ],
   controllers: [AuthController],
   providers: [

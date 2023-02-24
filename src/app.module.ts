@@ -8,7 +8,9 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { MysqlConfigService } from './mysql/mysql.config.service';
 import { HttpExceptionFilter } from './error/http-exception.filter';
+import { EmailModule } from './email/email.module';
 import * as Joi from 'joi';
+// import { RedisConfigModule } from './redis/redis.config.module';
 
 @Module({
   imports: [
@@ -29,6 +31,19 @@ import * as Joi from 'joi';
         JWT_ACCESS_EXPIRATION_TIME: Joi.string().required(),
         JWT_REFRESH_TOKEN_SECRET: Joi.string().required(),
         JWT_REFRESH_EXPIRATION_TIME: Joi.string().required(),
+
+        /** Redis */
+        // REDIS_HOST: Joi.string().required(),
+        // REDIS_PORT: Joi.number().required(),
+
+        /**Node-Mailer-google */
+        MAILER_HOST: Joi.string(),
+        MAILER_USER: Joi.string(),
+        MAILER_PWD: Joi.string(),
+        /** AWS-SES */
+        AWS_SES_REGION: Joi.string().required(),
+        AWS_SES_ACCESS_ID: Joi.string().required(),
+        AWS_SES_ACCESS_SECRET: Joi.string().required(),
       }),
     }),
     TypeOrmModule.forRootAsync({
@@ -37,6 +52,8 @@ import * as Joi from 'joi';
     }),
     AuthModule,
     UsersModule,
+    EmailModule,
+    // RedisConfigModule,
   ],
   controllers: [],
   providers: [
