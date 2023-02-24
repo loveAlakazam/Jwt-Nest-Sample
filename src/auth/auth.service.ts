@@ -17,6 +17,7 @@ import { SocialUserDto } from '../users/interfaces/social-user.interface';
 import { HttpExceptionFilter } from '../error/http-exception.filter';
 import { ValidateLoginResponseDto } from './dto/validate-login-response.dto';
 import { EmailService } from '../email/email.service';
+import { UserGeneratedEvent } from '../events/user-generated.event';
 
 @UseFilters(new HttpExceptionFilter())
 @Injectable()
@@ -90,6 +91,10 @@ export class AuthService {
       await this.updateRefreshToken(newUser.id, tokens.refreshToken);
 
       // 이벤트 호출: 회원가입 환영 이메일
+      this.eventEmitter.emit(
+        'user.generated',
+        new UserGeneratedEvent(createUserDto.email, createUserDto.name),
+      );
 
       return tokens;
     } catch (error) {
@@ -114,6 +119,15 @@ export class AuthService {
       if (!newUser) {
         throw new NotFoundException(UsersErrorMessages.NOT_FOUND_USER);
       }
+
+      // 이벤트 호출: 회원가입 환영 이메일
+      this.eventEmitter.emit(
+        'user.generated',
+        new UserGeneratedEvent(
+          createSocialUserDto.email,
+          createSocialUserDto.name,
+        ),
+      );
 
       return newUser;
     } catch (error) {
