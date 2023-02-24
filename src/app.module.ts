@@ -1,4 +1,4 @@
-import { CacheModule, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -10,7 +10,7 @@ import { MysqlConfigService } from './mysql/mysql.config.service';
 import { HttpExceptionFilter } from './error/http-exception.filter';
 import { EmailModule } from './email/email.module';
 import * as Joi from 'joi';
-import { RedisConfigModule } from './redis/redis.config.module';
+// import { RedisConfigModule } from './redis/redis.config.module';
 
 @Module({
   imports: [
@@ -33,8 +33,17 @@ import { RedisConfigModule } from './redis/redis.config.module';
         JWT_REFRESH_EXPIRATION_TIME: Joi.string().required(),
 
         /** Redis */
-        REDIS_HOST: Joi.string().required(),
-        REDIS_PORT: Joi.number().required(),
+        // REDIS_HOST: Joi.string().required(),
+        // REDIS_PORT: Joi.number().required(),
+
+        /**Node-Mailer-google */
+        MAILER_HOST: Joi.string(),
+        MAILER_USER: Joi.string(),
+        MAILER_PWD: Joi.string(),
+        /** AWS-SES */
+        AWS_SES_REGION: Joi.string().required(),
+        AWS_SES_ACCESS_ID: Joi.string().required(),
+        AWS_SES_ACCESS_SECRET: Joi.string().required(),
       }),
     }),
     TypeOrmModule.forRootAsync({
@@ -44,7 +53,7 @@ import { RedisConfigModule } from './redis/redis.config.module';
     AuthModule,
     UsersModule,
     EmailModule,
-    RedisConfigModule,
+    // RedisConfigModule,
   ],
   controllers: [],
   providers: [
