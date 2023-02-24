@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_FILTER } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppService } from './app.service';
@@ -10,7 +10,9 @@ import { MysqlConfigService } from './mysql/mysql.config.service';
 import { HttpExceptionFilter } from './error/http-exception.filter';
 import { EmailModule } from './email/email.module';
 import * as Joi from 'joi';
-// import { RedisConfigModule } from './redis/redis.config.module';
+import { RedisModule } from '@liaoliaots/nestjs-redis';
+import { CacheModule } from './redis/cache.module';
+import { RedisConfigService } from './redis/redis.config.service';
 
 @Module({
   imports: [
@@ -53,7 +55,12 @@ import * as Joi from 'joi';
     AuthModule,
     UsersModule,
     EmailModule,
-    // RedisConfigModule,
+    RedisModule.forRootAsync({
+      imports: [ConfigModule],
+      useClass: RedisConfigService,
+      inject: [ConfigService],
+    }),
+    CacheModule,
   ],
   controllers: [],
   providers: [
