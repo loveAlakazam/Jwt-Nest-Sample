@@ -1,15 +1,19 @@
 import { MailerService } from '@nestjs-modules/mailer';
-import { Injectable, UseFilters } from '@nestjs/common';
+import { Injectable, Logger, UseFilters } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpExceptionFilter } from '../error/http-exception.filter';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
 import { SendEmailByNodemailerRequestDto } from './dto/send-email-by-nodemailer-request.dto';
 import { SendEmailBySesRequestDto } from './dto/send-email-by-ses-request.dto';
+import { UserGeneratedEvent } from 'src/events/user-generated.event';
+import { EmailTemplate } from './emailTemplate/email-template';
+import { AppService } from 'src/app.service';
 
 @UseFilters(new HttpExceptionFilter())
 @Injectable()
 export class EmailService {
+  private readonly logger = new Logger(AppService.name);
   private sesClient: SESClient;
 
   constructor(
@@ -97,9 +101,17 @@ export class EmailService {
     }
   }
 
-  @OnEvent('mail_greeting_newbie', { async: true })
-  public async handleMailGreetingNewbie() {
+  @OnEvent('user.generated', { async: true })
+  public async welcomeUserGenerated(requestDto: UserGeneratedEvent) {
     // 가입자에게 이메일 전송한다.
-    return;
+    const { title, content } = EmailTemplate.GREET_NEWBIE(requestDto.name);
+
+    await this.sendMailBySES({
+      email: requestDto.email,
+      subject: title,
+      mailBody: content,
+    });
+
+    this.logger.log(`Send mail to new user (${requestDto.email})`);
   }
 }
