@@ -13,6 +13,7 @@ import * as Joi from 'joi';
 import { RedisModule } from '@liaoliaots/nestjs-redis';
 import { CacheModule } from './redis/cache.module';
 import { RedisConfigService } from './redis/redis.config.service';
+import { SmsModule } from './sms/sms.module';
 
 @Module({
   imports: [
@@ -35,17 +36,23 @@ import { RedisConfigService } from './redis/redis.config.service';
         JWT_REFRESH_EXPIRATION_TIME: Joi.string().required(),
 
         /** Redis */
-        // REDIS_HOST: Joi.string().required(),
-        // REDIS_PORT: Joi.number().required(),
+        REDIS_HOST: Joi.string().required(),
+        REDIS_PORT: Joi.number().required(),
 
         /**Node-Mailer-google */
         MAILER_HOST: Joi.string(),
         MAILER_USER: Joi.string(),
         MAILER_PWD: Joi.string(),
+
         /** AWS-SES */
         AWS_SES_REGION: Joi.string().required(),
         AWS_SES_ACCESS_ID: Joi.string().required(),
         AWS_SES_ACCESS_SECRET: Joi.string().required(),
+
+        /**Twillow -SMS API */
+        TWILIOW_ACCOUNT_SID: Joi.string().required(),
+        TWILIOW_AUTH_TOKEN: Joi.string().required(),
+        TWILIOW_PHONE_NUMBER: Joi.string().required(),
       }),
     }),
     TypeOrmModule.forRootAsync({
@@ -61,6 +68,7 @@ import { RedisConfigService } from './redis/redis.config.service';
       inject: [ConfigService],
     }),
     CacheModule,
+    SmsModule,
   ],
   controllers: [],
   providers: [
