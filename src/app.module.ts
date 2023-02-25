@@ -53,6 +53,7 @@ import { SmsModule } from './sms/sms.module';
         TWILIOW_ACCOUNT_SID: Joi.string().required(),
         TWILIOW_AUTH_TOKEN: Joi.string().required(),
         TWILIOW_PHONE_NUMBER: Joi.string().required(),
+        TWILIOW_SMS_SERVICE_SID: Joi.string().required(),
       }),
     }),
     TypeOrmModule.forRootAsync({
