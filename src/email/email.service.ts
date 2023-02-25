@@ -6,9 +6,9 @@ import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
 import { SendEmailByNodemailerRequestDto } from './dto/send-email-by-nodemailer-request.dto';
 import { SendEmailBySesRequestDto } from './dto/send-email-by-ses-request.dto';
-import { UserGeneratedEvent } from 'src/events/user-generated.event';
+import { UserGeneratedEvent } from '../events/user-generated.event';
 import { EmailTemplate } from './emailTemplate/email-template';
-import { AppService } from 'src/app.service';
+import { AppService } from '../app.service';
 
 @UseFilters(new HttpExceptionFilter())
 @Injectable()
@@ -54,7 +54,7 @@ export class EmailService {
             },
           },
         },
-        Source: 'busybe@yopmail.com',
+        Source: this.configService.get('AWS_SES_SENDER'),
         ReplyToAddresses: [],
       });
       await this.sesClient.send(command);
